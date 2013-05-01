@@ -5,7 +5,7 @@ Read a vim history file and transform it to a list
 
 import struct
 
-FILE = "test/%Users%pomier%projects%vichy%client%history%cuicui.txt"
+FILE = "test/%Users%pomier%projects%vichy%client%history%test.txt"
 UF_ENTRY_MAGIC = 0xf518
 UF_HEADER_MAGIC = 0x5fd0
 UF_START_MAGIC = "Vim\237UnDo\345"
@@ -27,7 +27,8 @@ class Header:
         self.entries = []
 
     def __str__(self):
-        return str(self.entries)
+        s = "Seq: %d - Prev: %d - Next: %d"%(self.seq, self.prev_seq, self.next_seq)
+        return s
 
 
 class Pos:
@@ -48,17 +49,38 @@ class Entry:
 
     def __init__(self):
         self.top = 0
+        #self.bot == 0 means the end of the document
         self.bot = 0
         self.lcount = 0
         self.size = 0
         self.array = []
 
     def __str__(self):
-        s = "Line %d to %d, %d lines, size %d"%(self.top, self.bot, self.lcount, self.size)
+        s = ""
+        if self.bot == 0:
+            s += "Remove lines from line %d to the end\n"%(self.top+1)
+        if self.bot == self.top + 1:
+            s += "Remove line %d\n"%(self.top+1)
+        elif self.top < self.bot:
+            s += "Remove lines %d to %d\n"%(self.top+1, self.bot-1)
+        if len(self.array) > 0:
+            s += "Add the following %d line(s) at line %d"%(self.size, self.top+1)
+        for l in self.array:
+            s += "\n%s"%(l)
         return s
 
     def __repr__(self):
-        s = "Line %d to %d, %d lines, size %d"%(self.top, self.bot, self.lcount, self.size)
+        s = ""
+        if self.bot == 0:
+            s += "Remove %d to end - "%(self.top+1)
+        if self.bot == self.top + 1:
+            s += "Remove %d - "%(self.top+1)
+        elif self.top < self.bot:
+            s += "Remove %d to %d - "%(self.top+1, self.bot-1)
+        if len(self.array) > 0:
+            s += "Add at %d: "%(self.top+1)
+        for l in self.array:
+            s += "\\n%s"%(l)
         return s
 
 class VisualInfo:
@@ -75,6 +97,14 @@ class HistoryFile:
         self.content = bytearray(f.read())
         self.length = len(self.content)
         self.pointer = 0
+        self.old_header_seq = 0;
+        self.new_header_seq = 0;
+        self.cur_header_seq = 0;
+        self.num_head = 0;
+        self.seq_last = 0;
+        self.seq_cur = 0;
+        self.header = {}
+
 
     def read(self, n):
         result = self.content[self.pointer:self.pointer+n]
@@ -100,122 +130,145 @@ class HistoryFile:
         else:
             self.pointer += 2
             return False
-        
 
+    def get_double(self):
+        return struct.unpack_from('d', buffer(self.read(8)[::-1]))[0]
     
-
-def get_double(f):
-    return struct.unpack_from('d', buffer(f.read(8)[::-1]))[0]
-
-def get_int(f):
-    return struct.unpack_from('i', buffer(f.read(4)[::-1]))[0]
-
-def get_short(f):
-    return struct.unpack_from('H', buffer(f.read(2)[::-1]))[0]
-
-def get_char(f):
-    return struct.unpack_from('b', buffer(f.read(1)[::-1]))[0]
-
-def get_header(f):
-    """Get the next header of the file"""
-    uhp = Header()
-    uhp.next_seq = get_int(f)
-    uhp.prev_seq = get_int(f)
-    uhp.alt_next_seq = get_int(f)
-    uhp.alt_prev_seq = get_int(f)
-    uhp.seq = get_int(f)
-    if uhp.seq <= 0:
-       print "Error"
-       return
-
-    uhp.cursor = get_pos(f)
-    uhp.cursor_vcol = get_int(f)
-    uhp.uh_flags = get_short(f)
-
-    uhp.uh_visual = get_visual(f)
-
-    f.find_next_constant(245, 24)
-    while f.is_constant(245, 24):
-        uep = get_entry(f)
-        uhp.entries.append(uep)
-
-
-    return uhp
-
-def get_pos(f):
-    """Get position in history"""
-    pos = Pos()
-    pos.lnum = get_int(f)
-    pos.col = get_int(f)
-    pos.coladd = get_int(f)
-    return pos
-
-def get_entry(f):
-    """Get the next entry of the file"""
-    uep = Entry()
-    uep.top = get_int(f)
-    uep.bot = get_int(f)
-    uep.lcount = get_int(f)
-    uep.size = get_int(f)
-    for i in range(uep.size):
-        line_length = get_int(f)
-        uep.array.append(f.read(line_length))
-    return uep
-
-def get_visual(f):
-    v = VisualInfo()
-    v.vi_start = get_pos(f)
-    v.vi_end = get_pos(f)
-    v.vi_mode = get_int(f)
-    v.vi_curswant = get_int(f)
-    return v
-
-def read_header(f):
-    start = f.read(len(UF_START_MAGIC))
-    if start != UF_START_MAGIC:
-        print "Not a vim history file"
-        return
-
-    #Version
-    get_short(f)
-    #Hash
-    f.read(32)
-
-    nb_lines = get_int(f)
-    print "Number of lines: %d"%(nb_lines)
-
-    #Undo data for U
-    str_len = get_int(f)
-    if str_len > 0:
-        s = f.read(str_len)
-        ln = get_int(f)
-        cn = get_int(f)
-        print "Init text:\n%s"%(s)
-
-    old_header_seq = get_int(f);
-    new_header_seq = get_int(f);
-    cur_header_seq = get_int(f);
-    num_head = get_int(f);
-    seq_last = get_int(f);
-    seq_cur = get_int(f);
-
-    headers = []
-    while f.find_next_constant(95, 208):
-        f.is_constant(95, 208)
-        print "\n-------\nNew header\n-------\n"
-        uhp = get_header(f)
-        k = 0
-        for i in uhp.entries:
-            print "Entry %d"%(k)
-            print i
-            for j in i.array:
-                print ">>>> %s"%(j)
-            k += 1
+    def get_int(self):
+        return struct.unpack_from('i', buffer(self.read(4)[::-1]))[0]
+    
+    def get_short(self):
+        return struct.unpack_from('H', buffer(self.read(2)[::-1]))[0]
+    
+    def get_char(self):
+        return struct.unpack_from('b', buffer(self.read(1)[::-1]))[0]
+    
+    def get_header(self):
+        """Get the next header of the file"""
+        uhp = Header()
+        uhp.next_seq = self.get_int()
+        uhp.prev_seq = self.get_int()
+        uhp.alt_next_seq = self.get_int()
+        uhp.alt_prev_seq = self.get_int()
+        uhp.seq = self.get_int()
+        if uhp.seq <= 0:
+           print "Error"
+           return
+    
+        uhp.cursor = self.get_pos()
+        uhp.cursor_vcol = self.get_int()
+        uhp.uh_flags = self.get_short()
+    
+        uhp.uh_visual = self.get_visual()
+    
+        self.find_next_constant(245, 24)
+        while self.is_constant(245, 24):
+            uep = self.get_entry()
+            uhp.entries.append(uep)
+    
+        return uhp
+    
+    def get_pos(self):
+        """Get position in history"""
+        pos = Pos()
+        pos.lnum = self.get_int()
+        pos.col = self.get_int()
+        pos.coladd = self.get_int()
+        return pos
+    
+    def get_entry(self):
+        """Get the next entry of the file"""
+        uep = Entry()
+        uep.top = self.get_int()
+        uep.bot = self.get_int()
+        uep.lcount = self.get_int()
+        uep.size = self.get_int()
+        for i in range(uep.size):
+            line_length = self.get_int()
+            uep.array.append(f.read(line_length))
+        return uep
+    
+    def get_visual(self):
+        v = VisualInfo()
+        v.vi_start = self.get_pos()
+        v.vi_end = self.get_pos()
+        v.vi_mode = self.get_int()
+        v.vi_curswant = self.get_int()
+        return v
+    
+    def read_file(self):
+        start = self.read(len(UF_START_MAGIC))
+        if start != UF_START_MAGIC:
+            print "Not a vim history file"
+            return
+    
+        #Version
+        self.get_short()
+        #Hash
+        self.read(32)
+    
+        nb_lines = self.get_int()
+    
+        #Undo data for U
+        str_len = self.get_int()
+        if str_len > 0:
+            s = f.read(str_len)
+            ln = self.get_int()
+            cn = self.get_int()
+            print "Init text:\n%s"%(s)
+    
+        self.old_header_seq = self.get_int();
+        self.new_header_seq = self.get_int();
+        self.cur_header_seq = self.get_int();
+        self.num_head = self.get_int();
+        self.seq_last = self.get_int();
+        print "Last seq: %d"%(self.seq_last)
+        self.seq_cur = self.get_int();
+    
+        self.headers = {}
+        while self.find_next_constant(95, 208):
+            self.is_constant(95, 208)
+            uhp = self.get_header()
+            print "\n---------\nNew header\n---------"
+            print uhp
             print ""
-        headers.append(uhp)
+            k = 0
+            for i in uhp.entries:
+                print "Entry %d"%(k)
+                print i
+                k += 1
+            self.headers[uhp.seq] = uhp
 
+    def get_chain_of_modifications(self):
+        """Returns the lists of modifications
+           [undo, redo]
+           undo: upcoming undo
+           redo: upcoming redo"""
+
+        undo = []
+        redo = []
+        current_seq = self.cur_header_seq
+        while current_seq != 0 and current_seq != self.seq_last:
+            if current_seq not in self.headers.keys():
+                break
+            cur = self.headers[current_seq]
+            for entry in cur.entries[::-1]:
+                undo.append(entry)
+            current_seq = cur.prev_seq
+        undo.reverse()
+
+        while current_seq != 0:
+            if current_seq not in self.headers.keys():
+                break
+            cur = self.headers[current_seq]
+            for entry in cur.entries:
+                redo.append(entry)
+            current_seq = cur.prev_seq
+
+        return [undo, redo]
 
 
 if __name__ == '__main__':
     f = HistoryFile(FILE)
-    read_header(f)
+    f.read_file()
+    print f.get_chain_of_modifications()
