@@ -1,6 +1,7 @@
 var util = require("util"),
 	EventEmitter = require("events").EventEmitter,
-	nb = require("vim-netbeans");
+	nb = require("vim-netbeans"),
+        $ = require("jquery");
 
 // Preserve the cursor position.
 // If transaction is provided, execute it and then restore the cursor.
@@ -280,7 +281,7 @@ Doc.prototype = {
 
 		this.buffers.forEach(function (buf) {
 			// todo: make this work
-			//if (buf != from) preserveCursor(buf, function () {
+                	//if (buf != from) preserveCursor(buf, function () {
 				//buf.remove(offset, length || 1);
 			//});
 			if (buf != from) buf.remove(offset, length || 1);
@@ -293,26 +294,33 @@ function getDocNameForBuffer(buf) {
 };
 
 function syncBuffer(buf) {
-	var doc = buf._doc;
-	if (doc) {
-		// reload buffer
-		doc.writeToBuffer(buf);
-	} else {
-		var docName = getDocNameForBuffer(buf);
-		doc = docs[docName];
-		if (doc) {
-			// existing doc contents take precendence
-			doc.writeToBuffer(buf);
-		} else {
-			// new doc gets buffer contents
-			doc = docs[docName] = new Doc(docName);
-			doc.readFromBuffer(buf);
-		}
-		doc.connectBuffer(buf);
-		buf._doc = doc;
+	var restoreCursor = preserveCursor(buf);
+
+	// clear buffer before inserting
+	buf.getLength(function (len) {
+		if (len) buf.remove(0, len, removedOld);
+		removedOld();
+	});
+
+	function removedOld(err) {
+		if (err) throw err;
+		$.ajax({
+			url: "http://www.google.fr/search",
+			data: {
+				q: "pomme"
+			},
+			success: function(data) {
+				console.log("Google !");
+				buf.insert(0, data.toString(), function (err) {
+					if (err) throw err;
+					restoreCursor();
+					buf.insertDone();
+				});
+			}
+		});
 	}
-	console.log("Syncing buffer " + buf.pathname +
-		" with doc " + doc.id + " (" + doc.name + ")");
+
+	console.log("Syncing buffer ");
 }
 
 var server = new nb.VimServer({
