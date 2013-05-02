@@ -11,6 +11,7 @@ matchDocName = (urlString) ->
 
 callUndo = (req, res) ->
     console.log("Entering CallUndo")
+
     # TODO: call getOps (version given by req), then submit the inverse operation
     queryData = ""
 
@@ -24,6 +25,7 @@ callUndo = (req, res) ->
         version = POST.version
         start = version - 1
         start = 0 if start < 0
+        console.log("Hello World")
         shareJSModel.getOps(doc_name, start, version, (error, ops) ->
             console.log("getOpsCallbackUndo")
             last_operation = "hello"
@@ -39,20 +41,23 @@ callUndo = (req, res) ->
 
             console.log(last_op)
 
+            last_version = last_version+1
             op_undo = {
                 v: last_version,
-                op: op_reversed
+                op: [op_reversed],
                 meta: {}
                 }
 
+            console.log("Undo")
+            console.log(op_undo)
             shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
                 if err
+                    console.log("err")
                     console.log(err)
                 else
                     console.log("OK")
                     console.log(newVersion)
             )
-            console.log(op_undo)
             for op in ops
               last_operation = op
               console.log("a")

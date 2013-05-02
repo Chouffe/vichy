@@ -9,7 +9,8 @@ ShareJS = require('share').server
 ShareJSOpts =
     browserChannel:     # set pluggable transport to BrowserChannel
         cors: "*"
-    db: {type: "mongo", opsCollectionPerDoc: false} # persistence
+    #db: {type: "mongo", opsCollectionPerDoc: false} # persistence
+    db: {type: "none"}
 
 # create a Connect server
 server = connect.createServer()
