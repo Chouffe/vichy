@@ -5,17 +5,19 @@
         <script src="bcsocket.js"></script>             <!-- add transport -->
         <script src="webclient/share.js"></script>      <!-- ShareJS -->
         <script src="webclient/textarea.js"></script>   <!-- helper to attach textarea to ShareJS server -->
+        <script src="work/undo.js"></script> <!-- provide undo function -->
         <!-- /NEW -->
     </head>
     <body>
         <h1>ShareJS Tutorial</h1>
+        <button onclick="undo()">Undo</button>
         <textarea id='sharetext' rows="20" cols="50" ></textarea>
         <!-- NEW -->
         <script>
             // get the textarea element 
             var elem = document.getElementById("sharetext");
             // connect to the server
-            var connection = sharejs.open('test', 'text', function(error, doc) {
+            var connection = sharejs.open('test', 'text', function(error, doc)
                 // this function is called once the connection is opened
                 if (error) {
                     console.log("ERROR:", error);
