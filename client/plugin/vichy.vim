@@ -6,9 +6,25 @@ endif
 
 function! Vichy()
 
+    " FIXME: Absolute Path!
     source history.vim
     nnoremap <buffer> - :call VichyToggleHistory()<enter>
     autocmd WinEnter * call CloseIfOnlyHistoryLeft()
+    " call VichyVimsyncStart()
+
+endfunction
+
+" Does not work...
+function! VichyVimsyncStart()
+
+python << EOF
+
+import subprocess
+
+subprocess.call("sleep 5", shell=True)
+
+EOF
+
 
 endfunction
 
