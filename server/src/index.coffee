@@ -20,7 +20,7 @@ server.use(connect['static'](__dirname + "/../static"))
 #ShareJS.create.createModel ShareJSOpts
 ShareJS.attach(server, ShareJSOpts)
 
-server.use(undo)
+server.use(undo(server.model))
 
 # set our server port and start the server
 port = 8000
