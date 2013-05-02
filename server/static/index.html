@@ -18,6 +18,7 @@
             var elem = document.getElementById("sharetext");
             // connect to the server
             var connection = sharejs.open('test', 'text', function(error, doc)
+            {
                 // this function is called once the connection is opened
                 if (error) {
                     console.log("ERROR:", error);
