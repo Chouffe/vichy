@@ -20,7 +20,23 @@ server.use(connect['static'](__dirname + "/../static"))
 #ShareJS.create.createModel ShareJSOpts
 ShareJS.attach(server, ShareJSOpts)
 
-server.use(undo)
+console.log("Try test")
+# server.model.getVersion "test", (verion) ->
+#     console.log(verion)
+#     server.model.getOps("test", 0, verion, (error, ops) ->
+#         console.log("getOpsCallBack")
+#         console.log(ops)
+#         console.log(error)
+#         )
+# server.model.getOps("test", 1, null, (error, ops) ->
+#     console.log("getOpsCallBack")
+#     console.log(ops)
+#     console.log(error)
+#     )
+console.log("After getOps")
+
+server.use(undo.parseUndo)
+undo.setModel(server.model)
 
 # set our server port and start the server
 port = 8000

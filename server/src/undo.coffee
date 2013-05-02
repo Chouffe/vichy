@@ -1,13 +1,13 @@
 http = require 'http'
 url = require 'url'
-ShareJS = require 'share'
 qs = require 'querystring'
+
+shareJSModel = null
 
 matchDocName = (urlString) ->
   urlParts = url.parse urlString
   parts = urlParts.pathname.match /^\/undo\/(?:([^\/]+?))\/?$/i
   return parts[1] if parts
-
 
 callUndo = (req, res) ->
     console.log("Entering CallUndo")
@@ -19,7 +19,15 @@ callUndo = (req, res) ->
 
     req.on('end', (end) ->
         POST = qs.parse(queryData)
-        console.log(POST))
+        console.log(POST)
+        doc_name = POST.doc_name
+        version = POST.version
+        start = version - 1
+        start = 0 if start < 0
+        shareJSModel.getOps(doc_name, start, version, (error, ops) ->
+            console.log("getOpsCallbackUndo")
+            console.log(ops)
+            console.log(error)))
         
     obj =
         string: "Hello World"
@@ -27,10 +35,6 @@ callUndo = (req, res) ->
     res.end JSON.stringify(obj) + '\n'
 
 
-# create a http request handler that is capable of routing request to the
-# correct functions
-# After getting the document name, `req` will have params which contain name of
-# the document
 parseUndo = (req, res, next) ->
     console.log("Entering undo handler")
     console.log(req.url)
@@ -41,4 +45,10 @@ parseUndo = (req, res, next) ->
     else
       next()
 
-module.exports = parseUndo
+setModel = (model) ->
+    console.log("Share model set")
+    shareJSModel = model
+    console.log(shareJSModel)
+
+exports.parseUndo = parseUndo
+exports.setModel = setModel
