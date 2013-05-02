@@ -1,50 +1,44 @@
 http = require 'http'
 url = require 'url'
+ShareJS = require 'share'
+qs = require 'querystring'
 
 matchDocName = (urlString) ->
   urlParts = url.parse urlString
   parts = urlParts.pathname.match /^\/undo\/(?:([^\/]+?))\/?$/i
   return parts[1] if parts
 
-stub = (req, res) ->
+
+callUndo = (req, res) ->
+    console.log("Entering CallUndo")
+    # TODO: call getOps (version given by req), then submit the inverse operation
+    queryData = ""
+
+    req.on('data', (data) ->
+        queryData += data)
+
+    req.on('end', (end) ->
+        POST = qs.parse(queryData)
+        console.log(POST))
+        
     obj =
         string: "Hello World"
     res.writeHead 200, {'Content-Type': 'application/json'}
     res.end JSON.stringify(obj) + '\n'
 
-# prepare data for createClient. If createClient success, then we pass client
-# together with req and res into the callback. Otherwise, stop the flow right
-# here and send error back
-#
-# req - instance of 'http.ServerRequest'
-# res - instance of 'http.ClientRequest'
-# createClient - create a sharejs client
-# cb - callback which accept req, res, client in that order
-auth = (req, res, createClient, cb) ->
-  data =
-    headers: req.headers
-    remoteAddress: req.connection.remoteAddress
-
-  createClient data, (error, client) ->
-    if client
-      cb? req, res, client
-    else
-      sendError res, error
 
 # create a http request handler that is capable of routing request to the
 # correct functions
 # After getting the document name, `req` will have params which contain name of
 # the document
-makeDispatchHandler = (req, res, next) ->
+parseUndo = (req, res, next) ->
     console.log("Entering undo handler")
-    if name = matchDocName(req.url)
-      req.params or= {}
-      req.params.name = name
+    console.log(req.url)
+    if req.url == "/undo"
       switch req.method
-        when 'GET'  then stub req, res
-        when 'POST' then stub req, res
+        when 'POST' then callUndo req, res
         else next()
     else
       next()
 
-module.exports = makeDispatchHandler
+module.exports = parseUndo
