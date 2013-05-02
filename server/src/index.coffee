@@ -20,7 +20,6 @@ server.use(connect['static'](__dirname + "/../static"))
 #ShareJS.create.createModel ShareJSOpts
 ShareJS.attach(server, ShareJSOpts)
 
-console.log("Try test")
 # server.model.getVersion "test", (verion) ->
 #     console.log(verion)
 #     server.model.getOps("test", 0, verion, (error, ops) ->
@@ -33,7 +32,6 @@ console.log("Try test")
 #     console.log(ops)
 #     console.log(error)
 #     )
-console.log("After getOps")
 
 server.use(undo.parseUndo)
 undo.setModel(server.model)

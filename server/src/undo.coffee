@@ -26,19 +26,55 @@ callUndo = (req, res) ->
         start = 0 if start < 0
         shareJSModel.getOps(doc_name, start, version, (error, ops) ->
             console.log("getOpsCallbackUndo")
-            console.log(ops)
-            console.log(error)))
+            last_operation = "hello"
+            last_operation = ops[0]
+            last_version = last_operation.v
+            last_op = last_operation.op[0] # Is it possible to have more than one op ?
+            op_reversed = {}
+            op_reversed.p = last_op.p
+            if last_op.i
+                op_reversed.d = last_op.i
+            else
+                op_reversed.i =last_op.d
+
+            console.log(last_op)
+
+            op_undo = {
+                v: last_version,
+                op: op_reversed
+                meta: {}
+                }
+
+            shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
+                if err
+                    console.log(err)
+                else
+                    console.log("OK")
+                    console.log(newVersion)
+            )
+            console.log(op_undo)
+            for op in ops
+              last_operation = op
+              console.log("a")
+              console.log(op)
+              console.log("b")
+              console.log(op.op)
+              console.log("c")
+              console.log(op.op[0].p)
+              console.log(op.op[0].i))  
+
         
     obj =
         string: "Hello World"
     res.writeHead 200, {'Content-Type': 'application/json'}
     res.end JSON.stringify(obj) + '\n'
+    )
 
 
 parseUndo = (req, res, next) ->
-    console.log("Entering undo handler")
     console.log(req.url)
     if req.url == "/undo"
+      console.log("Entering undo handler")
       switch req.method
         when 'POST' then callUndo req, res
         else next()
