@@ -3,11 +3,45 @@ url = require 'url'
 qs = require 'querystring'
 
 shareJSModel = null
+UNDO_PARAM = 5
 
 matchDocName = (urlString) ->
   urlParts = url.parse urlString
   parts = urlParts.pathname.match /^\/undo\/(?:([^\/]+?))\/?$/i
   return parts[1] if parts
+
+#Return the index of the first element of array which matches
+#cond
+index = (array, cond) ->
+  result = -1
+  i = 0
+  for elem in array
+    if cond(elem)
+      return i
+    i += 1
+
+#Take a list of ops and remove the undo / undone ops
+filterUndone = (ops, callback) ->
+    undo_ops = []
+    do_ops = []
+    for op in ops
+      if op.meta and op.meta.undo
+        undo_ops.push(op)
+      else
+        do_ops.push(op)
+
+    for undo_op in undo_ops
+      undone_version = undo_op.meta.undo
+      i = index(do_ops, (do_op) ->
+        do_op.v == undone_version)
+      delete do_ops[i]
+
+    #Remove undefined (= previously deleted) operations
+    results = []
+    for op in do_ops
+      results.push(op) if op
+
+    return results
 
 callUndo = (req, res) ->
     console.log("Entering CallUndo")
@@ -23,14 +57,19 @@ callUndo = (req, res) ->
         console.log(POST)
         doc_name = POST.doc_name
         version = POST.version
-        start = version - 1
+        start = version - UNDO_PARAM
         start = 0 if start < 0
         console.log("Hello World")
         shareJSModel.getOps(doc_name, start, version, (error, ops) ->
             console.log("getOpsCallbackUndo")
-            last_operation = "hello"
-            last_operation = ops[0]
+            last_operation = ops[ops.length-1]
             last_version = last_operation.v
+            console.log("Before filter")
+            console.log(ops)
+            ops = filterUndone(ops)
+            console.log("After filter")
+            console.log(ops)
+            last_operation = ops[ops.length-1]
             last_op = last_operation.op[0] # Is it possible to have more than one op ?
             op_reversed = {}
             op_reversed.p = last_op.p
@@ -41,33 +80,23 @@ callUndo = (req, res) ->
 
             console.log(last_op)
 
-            last_version = last_version+1
+            version = last_version+1
             op_undo = {
-                v: last_version,
+                v: version,
                 op: [op_reversed],
-                meta: {}
+                meta: {undo: last_version}
                 }
 
             console.log("Undo")
             console.log(op_undo)
             shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
-                if err
-                    console.log("err")
-                    console.log(err)
-                else
-                    console.log("OK")
-                    console.log(newVersion)
+              if err
+                console.log("err")
+                console.log(err)
+              else
+                console.log("OK")
+                console.log(newVersion))
             )
-            for op in ops
-              last_operation = op
-              console.log("a")
-              console.log(op)
-              console.log("b")
-              console.log(op.op)
-              console.log("c")
-              console.log(op.op[0].p)
-              console.log(op.op[0].i))  
-
         
     obj =
         string: "Hello World"
