@@ -57,31 +57,27 @@ callUndo = (req, res) ->
 
     req.on('end', (end) ->
         POST = qs.parse(queryData)
-        console.log(POST)
         doc_name = POST.doc_name
         version = POST.version
         start = version - UNDO_PARAM
         start = 0 if start < 0
-        console.log("Hello World")
         shareJSModel.getOps(doc_name, start, version, (error, ops) ->
-            console.log("getOpsCallbackUndo")
             if ops.length < 1
               obj.string = "Nothing to undo"
               return
-            last_operation = ops[ops.length-1]
-            version = last_operation.v+1
-            console.log("Before filter")
-            console.log(ops)
+            version = ops[ops.length-1].v + 1
+
+            #Remove undo operations and operations which were undone
             ops = filterUndone(ops)
             if ops.length < 1
               obj.string = "Already undone max number of operations"
               return
-            console.log("After filter")
-            console.log(ops)
+
             last_operation = ops[ops.length-1]
-            console.log(last_operation)
-            last_op = last_operation.op[0] # Is it possible to have more than one op ?
+            # Is it possible to have more than one op ?
+            last_op = last_operation.op[0]
             last_version = last_operation.v
+
             op_reversed = {}
             op_reversed.p = last_op.p
             if last_op.i
@@ -89,24 +85,20 @@ callUndo = (req, res) ->
             else
                 op_reversed.i =last_op.d
 
-            console.log(last_op)
-
             op_undo = {
                 v: version,
                 op: [op_reversed],
-                meta: {undo: last_version}
+                meta: {undo: last_version} #TODO Add client as source ?
                 }
 
-            console.log("Undo")
-            console.log(op_undo)
             shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
               if err
-                console.log("err")
-                console.log(err)
+                obj.string = "UNDO: applyOp failed" + err
+                console.log(obj.string)
               else
-                console.log("OK")
-                console.log(newVersion))
+                console.log("UNDO: applyOp success " + newVersion)
             )
+        )
         
     res.writeHead 200, {'Content-Type': 'application/json'}
     res.end JSON.stringify(obj) + '\n'
