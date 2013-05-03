@@ -3,7 +3,7 @@ url = require 'url'
 qs = require 'querystring'
 
 shareJSModel = null
-UNDO_PARAM = 5
+UNDO_PARAM = 10
 
 matchDocName = (urlString) ->
   urlParts = url.parse urlString
@@ -16,7 +16,7 @@ index = (array, cond) ->
   result = -1
   i = 0
   for elem in array
-    if cond(elem)
+    if elem and cond(elem)
       return i
     i += 1
 
@@ -32,6 +32,7 @@ filterUndone = (ops, callback) ->
 
     for undo_op in undo_ops
       undone_version = undo_op.meta.undo
+      console.log(do_ops)
       i = index(do_ops, (do_op) ->
         do_op.v == undone_version)
       delete do_ops[i]
@@ -45,6 +46,8 @@ filterUndone = (ops, callback) ->
 
 callUndo = (req, res) ->
     console.log("Entering CallUndo")
+    obj =
+      string: ""
 
     # TODO: call getOps (version given by req), then submit the inverse operation
     queryData = ""
@@ -62,15 +65,23 @@ callUndo = (req, res) ->
         console.log("Hello World")
         shareJSModel.getOps(doc_name, start, version, (error, ops) ->
             console.log("getOpsCallbackUndo")
+            if ops.length < 1
+              obj.string = "Nothing to undo"
+              return
             last_operation = ops[ops.length-1]
-            last_version = last_operation.v
+            version = last_operation.v+1
             console.log("Before filter")
             console.log(ops)
             ops = filterUndone(ops)
+            if ops.length < 1
+              obj.string = "Already undone max number of operations"
+              return
             console.log("After filter")
             console.log(ops)
             last_operation = ops[ops.length-1]
+            console.log(last_operation)
             last_op = last_operation.op[0] # Is it possible to have more than one op ?
+            last_version = last_operation.v
             op_reversed = {}
             op_reversed.p = last_op.p
             if last_op.i
@@ -80,7 +91,6 @@ callUndo = (req, res) ->
 
             console.log(last_op)
 
-            version = last_version+1
             op_undo = {
                 v: version,
                 op: [op_reversed],
@@ -98,8 +108,6 @@ callUndo = (req, res) ->
                 console.log(newVersion))
             )
         
-    obj =
-        string: "Hello World"
     res.writeHead 200, {'Content-Type': 'application/json'}
     res.end JSON.stringify(obj) + '\n'
     )
