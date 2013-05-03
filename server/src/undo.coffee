@@ -25,14 +25,13 @@ filterUndone = (ops, callback) ->
     undo_ops = []
     do_ops = []
     for op in ops
-      if op.meta and op.meta.undo
+      if op.meta and (typeof op.meta.undo != "undefined")
         undo_ops.push(op)
       else
         do_ops.push(op)
 
     for undo_op in undo_ops
       undone_version = undo_op.meta.undo
-      console.log(do_ops)
       i = index(do_ops, (do_op) ->
         do_op.v == undone_version)
       delete do_ops[i]
@@ -66,6 +65,7 @@ callUndo = (req, res) ->
               obj.string = "Nothing to undo"
               return
             version = ops[ops.length-1].v + 1
+
 
             #Remove undo operations and operations which were undone
             ops = filterUndone(ops)
@@ -118,7 +118,6 @@ parseUndo = (req, res, next) ->
 setModel = (model) ->
     console.log("Share model set")
     shareJSModel = model
-    console.log(shareJSModel)
 
 exports.parseUndo = parseUndo
 exports.setModel = setModel
