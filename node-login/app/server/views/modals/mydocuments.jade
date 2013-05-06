@@ -1,0 +1,21 @@
+
+.modal-mydocs.modal.hide.fade
+    div.modal-header
+        button.close(data-dismiss='modal') x
+        h3
+    div.modal-body
+        p
+        fieldset
+            #clist-cg.control-group
+                label.control-label(for='country-list') My documents
+                .controls
+                    select#country-list(name='country')
+                        each item in countries
+                            option(selected=item.name == user.country)= item.name
+            #name-cg.control-group
+                label.control-label(for='name-tf') Add a user to the document
+                .controls
+                    input#name-tf.input-xlarge(type='text', name='name', value= user.name)
+    div.modal-footer
+        button(data-dismiss="modal").cancel.btn Cancel
+        button.submit.btn Ok
