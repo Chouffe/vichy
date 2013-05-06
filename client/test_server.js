@@ -47,7 +47,7 @@ app.get('/login/:username/:password.json', function(req, res) {
 
 app.get('/document/:document_id/:token.json', function(req, res) {
     res.send({
-        'text'    : 'print Hello World',
+        'text'    : '#!/usr/bin/python2.7\n\nprint Hello World',
         'version' : 42,
     });
 });

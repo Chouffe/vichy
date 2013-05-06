@@ -4,15 +4,16 @@ var util = require("util"),
     $ = require("jquery");
 
 // Check arguments
-if (process.argv.length < 4) {
-    console.log("No username and password given")
+if (process.argv.length < 5) {
     console.log("Syntax:")
-    console.log("    node client_ide.js <username> <password>")
+    console.log("    node client_ide.js <username> <password> <document_id>")
     return
 }
 
-var domain = "localhost:3000"
-var token = login(process.argv[2], process.argv[3])
+var domain = "localhost:3000";
+var token = login(process.argv[2], process.argv[3]);
+var doc_id = process.argv[4];
+var doc_version = 0;
 
 // Log the current user on the server
 function login(username, password) {
@@ -30,6 +31,45 @@ function login(username, password) {
             }
         }
     });
+}
+
+// Contact the server to get the current version of the document
+function getDocumentFromServer(buf) {
+    console.log("Fetching document from server...");
+    $.ajax({
+        url: "http://"+domain+"/document/"+doc_id+"/"+token+".json",
+        success: function(data) {
+            if (typeof(data["error"]) != "undefined"){
+                console.log("Document error: "+data["error"]);
+            }
+            else{
+                console.log("Received document:\n"+data["text"]);
+                doc_version = data["version"];
+                pushTextToBuffer(buf, data["text"]);
+            }
+        }
+    });
+}
+
+function pushTextToBuffer(buf, text) {
+    var restoreCursor = preserveCursor(buf);
+
+    // clear buffer before inserting
+    buf.getLength(function (len) {
+        if (len)
+            buf.remove(0, len, insertText);
+        else
+            insertText();
+    });
+
+    function insertText(err) {
+        if (err) throw err;
+        buf.insert(0, text.toString(), function (err) {
+            if (err) throw err;
+            restoreCursor();
+            buf.insertDone();
+        });
+    }
 }
 
 // Preserve the cursor position.
@@ -322,36 +362,6 @@ function getDocNameForBuffer(buf) {
     return (buf.pathname.match(/[^\/]*$/) || 0)[0];
 };
 
-function syncBuffer(buf) {
-    var restoreCursor = preserveCursor(buf);
-
-    // clear buffer before inserting
-    buf.getLength(function (len) {
-        if (len) buf.remove(0, len, removedOld);
-        removedOld();
-    });
-
-    function removedOld(err) {
-        if (err) throw err;
-        $.ajax({
-            url: "http://www.google.fr/search",
-            data: {
-                q: "pomme"
-            },
-            success: function(data) {
-                console.log("Google !");
-                buf.insert(0, data.toString(), function (err) {
-                    if (err) throw err;
-                    restoreCursor();
-                    buf.insertDone();
-                });
-            }
-        });
-    }
-
-    console.log("Syncing buffer ");
-}
-
 function launchServer(){
     var server = new nb.VimServer({
         debug: process.argv.indexOf("-v") != -1
@@ -360,7 +370,7 @@ function launchServer(){
         vim.key
     
         // Open this buffer for syncing.
-        vim.key("C-o", syncBuffer);
+        vim.key("C-o", getDocumentFromServer);
         
         vim.on("killed", function (buf) {
             var doc = buf && buf._doc;
