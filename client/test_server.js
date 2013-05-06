@@ -31,10 +31,18 @@ app.get('/insert/:document_id/:current_version/:offset/:text/:token.json', funct
 });
 
 app.get('/login/:username/:password.json', function(req, res) {
-    res.send({
-        'username' : req.params.username,
-        'token'    : 'hfuh9_fqsdqs<xddqsw-"(-',
-    });
+    if (req.params.username == "romain" && req.params.password == "blublu"){
+        res.send({
+            'username' : req.params.username,
+            'token'    : '37ab42b569e3e93c2ab4d7935c11d672',
+        });
+    }
+    else{
+        res.send({
+            'username' : req.params.username,
+            'error' : 'Wrong username/password'
+        });
+    }
 });
 
 app.get('/document/:document_id/:token.json', function(req, res) {
