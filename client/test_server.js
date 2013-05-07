@@ -57,12 +57,12 @@ app.get('/blame/:document_id/:token.json', function(req, res) {
                    {
                     'line'   : '1',
                     'author' : 'Chuck Norris',
-                    'Date'   : '2013-04-22T05:46:24Z'
+                    'date'   : '2013-04-22T05:46:24Z'
                    },
                    {
                     'line'   : '2',
                     'author' : 'Chuck Norris',
-                    'Date'   : '2013-04-22T05:46:42Z'
+                    'date'   : '2013-04-22T05:46:42Z'
                    },
               ];
     res.send({
