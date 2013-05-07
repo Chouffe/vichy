@@ -359,11 +359,17 @@ Doc.prototype = {
 };
 
 function getBlameForBuffer(buf) {
+
+    // For the tests
+    var numb_lines = 50;
+
     $.ajax({
-        url: "http://"+domain+"/blame/"+doc_id+"/"+token+".json",
+        // url: "http://"+domain+"/blame/"+doc_id+"/"+token+".json",
+        // Tests
+        url: "http://"+domain+"/blame/"+doc_id+"/"+numb_lines+"/"+token+".json",
         success: function(data) {
             if (typeof(data["error"]) != "undefined"){
-                console.log("Login error: "+data["error"]);
+                console.log("Login error: " + data["error"]);
             }
             else {
                 if (data["blame"]) {
@@ -391,8 +397,20 @@ function fillBufferWithBlame(buf, blame) {
             offset += line.length
         }
 
+    buf.insertDone();
+
     });
 };
+
+// Simulate a sleep function
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds){
+            break;
+        }
+    }
+}
 
 function getDocNameForBuffer(buf) {
     return (buf.pathname.match(/[^\/]*$/) || 0)[0];
@@ -415,6 +433,17 @@ function launchServer(){
         vim.on("killed", function (buf) {
             var doc = buf && buf._doc;
             if (doc) doc.disconnectBuffer(buf);
+        });
+
+        // Listener for the vichyBlame
+        vim.on("newBuffer", function (buffer) {
+            // Sleep so that the vimscript can add the text vichyBlame
+            sleep(50);
+            buffer.getText(function (text) {
+                if (text.replace(/(\r\n|\n|\r)/gm,"") == 'vichyBlame') {
+                    getBlameForBuffer(buffer);
+                }
+            });
         });
     
         vim.on("disconnected", function () {

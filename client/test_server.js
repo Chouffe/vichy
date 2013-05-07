@@ -73,17 +73,13 @@ app.get('/blame/:document_id/:token.json', function(req, res) {
 });
 
 app.get('/blame/:document_id/:numb_line/:token.json', function(req, res) {
-    var line =     {
-                    'line'   : '1',
-                    'author' : 'Chuck Norris',
-                    'date'   : '2013-04-22T05:46:24Z'
-                   };
+
     var blame = new Array(req.params.numb_line);
     var line = null;
     for ( var i = 0; i < req.params.numb_line ; i++ ) {
         line =     {
                     'line'   : i + 1,
-                    'author' : 'Chuck Norris',
+                    'author' : 'Chuck',
                     'date'   : '2013-04-22T05:46:24Z'
                    };
         blame[i] = line;
