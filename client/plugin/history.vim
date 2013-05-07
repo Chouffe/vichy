@@ -57,58 +57,65 @@ vim.command("nnoremap x :bwipeout %")
 history_buffer = vim.current.buffer
 history_window = vim.current.window
 
-# Create the JSON
-d1 = {'author': 'Arthur', 'date': '2013-14-01:12:04'}
-d2 = {'author': 'Paul', 'date': '2013-14-01:12:04'}
-d3 = {'author': 'Romain', 'date': '2013-14-01:12:04'}
-d4 = {'author': 'Bertrand', 'date': '2013-14-01:12:04'}
+# Call the plugin
+history_buffer[0] = 'vichyBlame'
+# Do something less ugly...
+vim.command("echom 'Loading the Blame..'")
+vim.command("sleep 3000m")
+# vim.command("<C-i>");
 
-d = []
-for i in xrange(num_line):
-
-    if i % 4 == 0:
-        d.append(d1)
-    elif i % 4 == 1:
-        d.append(d2)
-    elif i % 4 == 2:
-        d.append(d3)
-    else:
-        d.append(d4)
-
-
-data = json.dumps(d)
-hist = json.loads(data)
-
-colors = ['blue', 'red', 'green', 'yellow']
-date_color = 'red'
-dates = set()
-authors = set()
-
-# Fill the history buffer with the JSON data
-for i, line in enumerate(hist):
-    if i > 0:
-        # Add a new empty line
-        vim.command("put =''")
-
-    if line['author'] not in authors:
-        authors.add(line['author'])
-
-    if line['date'] not in dates:
-        dates.add(line['date'])
-
-    # Add the history line
-    history_buffer[i] = "{} - {}".format(line['date'], line['author'])
-
-# vim.command("highlight Date ctermfg={}".format(date_color))
-
-for i, a in enumerate(authors):
-    vim.command("syntax keyword Author{} {}".format(i, a))
-    vim.command("highlight Author{} ctermfg={}".format(i, colors[i % len(colors)]))
-
-# TODO: Fix the date coloring
-for i, d in enumerate(dates):
-    vim.command("syntax keyword Date{} {}".format(i, d))
-    vim.command("highlight Date{} ctermfg={}".format(i, 'red'))
+# # Create the JSON
+# d1 = {'author': 'Arthur', 'date': '2013-14-01:12:04'}
+# d2 = {'author': 'Paul', 'date': '2013-14-01:12:04'}
+# d3 = {'author': 'Romain', 'date': '2013-14-01:12:04'}
+# d4 = {'author': 'Bertrand', 'date': '2013-14-01:12:04'}
+# 
+# d = []
+# for i in xrange(num_line):
+# 
+#     if i % 4 == 0:
+#         d.append(d1)
+#     elif i % 4 == 1:
+#         d.append(d2)
+#     elif i % 4 == 2:
+#         d.append(d3)
+#     else:
+#         d.append(d4)
+# 
+# 
+# data = json.dumps(d)
+# hist = json.loads(data)
+# 
+# colors = ['blue', 'red', 'green', 'yellow']
+# date_color = 'red'
+# dates = set()
+# authors = set()
+# 
+# # Fill the history buffer with the JSON data
+# for i, line in enumerate(hist):
+#     if i > 0:
+#         # Add a new empty line
+#         vim.command("put =''")
+# 
+#     if line['author'] not in authors:
+#         authors.add(line['author'])
+# 
+#     if line['date'] not in dates:
+#         dates.add(line['date'])
+# 
+#     # Add the history line
+#     history_buffer[i] = "{} - {}".format(line['date'], line['author'])
+# 
+# # vim.command("highlight Date ctermfg={}".format(date_color))
+# 
+# for i, a in enumerate(authors):
+#     vim.command("syntax keyword Author{} {}".format(i, a))
+#     vim.command("highlight Author{} ctermfg={}".format(i, colors[i % len(colors)]))
+# 
+# # TODO: Fix the date coloring
+# for i, d in enumerate(dates):
+#     vim.command("syntax keyword Date{} {}".format(i, d))
+#     vim.command("highlight Date{} ctermfg={}".format(i, 'red'))
 
 # Set the cursor at the same position as the initial buffer
 history_window.cursor = initial_cursor_position
