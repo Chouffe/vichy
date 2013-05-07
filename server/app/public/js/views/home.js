@@ -37,15 +37,23 @@ $(document).ready(function(){
 	$('#account-form-btn1').addClass('btn-danger');
 	$('#account-form-btn2').html('Update');
 	$('#account-form-btn3').html('My documents');
+	$('#account-form-btn4').html('New Document');
+	
+// setup the new document window
+
+    $('.modal-newdoc').modal({ show : false, keyboard : true, backdrop : true });
+	$('.modal-newdoc .modal-header h3').text('Create a new document');
+	//$('.modal-newdoc .modal-body p').html('Give a name to your document');
+	$('.modal-newdoc .cancel').html('Cancel');
+	$('.modal-newdoc .submit').html('Create');
 	
 // setup the documents window
 
 	$('.modal-mydocs').modal({ show : false, keyboard : true, backdrop : true });
 	$('.modal-mydocs .modal-header h3').text('My documents');
-	$('.modal-confirm .modal-body p').html('Manage your document rights');
+	$('.modal-mydocs .modal-body p').html('Manage your document rights');
 	$('.modal-mydocs .cancel').html('Cancel');
-	$('.modal-mydocs .submit').html('Delete');
-	$('.modal-mydocs .submit').addClass('btn-danger');
+	$('.modal-mydocs .submit').html('Submit');
 
 // setup the confirm window that displays when the user chooses to delete their account //
 

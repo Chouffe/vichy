@@ -9,17 +9,40 @@ function HomeController()
 	$('#btn-logout').click(function(){ that.attemptLogout(); });
 
 // confirm account deletion //
-	$('#account-form-btn1').click(function(){console.log($('.modal-confirm')); $('.modal-confirm').modal('show');});
+	$('#account-form-btn1').click(function(){ $('.modal-confirm').modal('show');});
 	
 // open My documents
-	$('#account-form-btn3').click(function(){console.log($('.modal-mydocs')); $('.modal-mydocs').modal('show');});
+	$('#account-form-btn3').click(function(){ $('.modal-mydocs').modal('show');});
+	
+// create a new doc
+	$('#account-form-btn4').click(function(){ $('.modal-newdoc').modal('show');});
 
 // handle account deletion //
 	$('.modal-confirm .submit').click(function(){ that.deleteAccount(); });
 	
 // handle documents change //
-
 	$('.modal-mydocs .submit').click(function(){ that.addUser(); });
+
+// handle new document submission //
+	$('.modal-newdoc .submit').click(function(){ that.newDoc(); });
+	
+	this.newDoc = function()
+	{
+		$('.modal-newdoc').modal('hide');
+		//console.log('ok '+'  '+$('#name-doc').val());
+		var that = this;
+		$.ajax({
+			url: '/newdoc',
+			type: 'POST',
+			data: { id: $('#userId').val(), doc: $('#name-doc').val() },
+			success: function(data){
+	 			that.showLockedAlert('Your document has been created.');
+			},
+			error: function(jqXHR){
+				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
+			}
+		});
+	}
 	
 	this.addUser = function()
 	{
@@ -28,9 +51,9 @@ function HomeController()
 		$.ajax({
 			url: '/mydocuments',
 			type: 'POST',
-			data: { id: $('#userId').val(), },
+			data: { id: $('#userId').val(), doc: $('.modal-mydocs #clist-cg.control-group .controls').val(), user: $('.modal-mydocs #name-cg.control-group .controls').val() },
 			success: function(data){
-	 			that.showLockedAlert('Your account has been deleted.<br>Redirecting you back to the homepage.');
+	 			that.showLockedAlert('The user has been added to your document.<br>Redirecting you back to the homepage.');
 			},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);

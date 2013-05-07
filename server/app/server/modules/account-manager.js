@@ -19,6 +19,7 @@ var db = new MongoDB(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}),
 	}
 });
 var accounts = db.collection('accounts');
+var documents = db.collection('documents');
 
 /* login validation methods */
 
@@ -91,9 +92,16 @@ exports.updateAccount = function(newData, callback)
 	});
 }
 
+exports.addNewDoc = function(newData, callback)
+{
+	documents.save({doc: newData.doc, user: newData.user});
+}
+
 exports.addUser = function(newData, callback)
 {
-	accounts.update({name: newData.name, }, {'$push': {'users': 'ruby'} });
+    accounts.findOne({'user':newData.user}, function(){
+	    documents.update({'doc': newData.doc}, {'$push': {'users': newData.user} });
+	});
 }
 
 exports.updatePassword = function(email, newPass, callback)

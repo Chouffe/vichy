@@ -1,0 +1,15 @@
+
+.modal-newdoc.modal.hide.fade
+    div.modal-header
+        button.close(data-dismiss='modal') x
+        h3
+    div.modal-body
+        p
+        fieldset
+            #name-cg.control-group
+                label.control-label(for='name-tf') Name your document
+                .controls
+                    input#name-doc.input-xlarge(type='text', name='name', value= 'name doc')
+    div.modal-footer
+        button(data-dismiss="modal").cancel.btn Cancel
+        button.submit.btn Ok

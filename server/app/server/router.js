@@ -182,10 +182,29 @@ module.exports = function(app) {
 		});
 	});
 	
+// Add a new document
+
+	app.post('/newdoc', function(req, res){
+		console.log(req.param('doc'), req.param('user'));
+		AM.addNewDoc({
+			doc 	: req.param('doc'),
+			user 	: req.param('user')
+			
+			}, function(e, obj){
+			if (!e){
+				//res.clearCookie('user');
+				//res.clearCookie('pass');
+	            //req.session.destroy(function(e){ res.send('ok', 200); });
+			}	else{
+				res.send('record not found', 400);
+			}
+	    });
+	});
+	
 // Add a user to an existing document
 
-    app.post('/mydocuments', function(req, res){
-		AM.addUser(req.body.id, function(e, obj){
+    /*app.post('/mydocuments', function(req, res){
+		AM.addUser({req.body.id, req.body.user, req.body.doc}, function(e, obj){
 			if (!e){
 				res.clearCookie('user');
 				res.clearCookie('pass');
@@ -194,9 +213,9 @@ module.exports = function(app) {
 				res.send('record not found', 400);
 			}
 	    });
-	});
+	});*/
 	
-	app.get('/mydocuments', function(req, res) {
+	/*app.get('/mydocuments', function(req, res) {
 		var email = req.query["e"];
 		var passH = req.query["p"];
 		AM.validateResetLink(email, passH, function(e){
@@ -208,7 +227,7 @@ module.exports = function(app) {
 				res.render('reset', { title : 'Reset Password' });
 			}
 		})
-	});
+	});*/
 	
 	app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
 

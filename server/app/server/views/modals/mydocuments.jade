@@ -7,9 +7,9 @@
         p
         fieldset
             #clist-cg.control-group
-                label.control-label(for='country-list') My documents
+                label.control-label(for='document-list') My documents
                 .controls
-                    select#country-list(name='country')
+                    select#document-list(name='country')
                         each item in countries
                             option(selected=item.name == user.country)= item.name
             #name-cg.control-group
