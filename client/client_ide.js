@@ -14,6 +14,7 @@ var domain = "localhost:3000";
 var token = login(process.argv[2], process.argv[3]);
 var doc_id = process.argv[4];
 var doc_version = 0;
+var doc_content = Buffer(0);
 
 // Log the current user on the server
 function login(username, password) {
@@ -31,45 +32,6 @@ function login(username, password) {
             }
         }
     });
-}
-
-// Contact the server to get the current version of the document
-function getDocumentFromServer(buf) {
-    console.log("Fetching document from server...");
-    $.ajax({
-        url: "http://"+domain+"/document/"+doc_id+"/"+token+".json",
-        success: function(data) {
-            if (typeof(data["error"]) != "undefined"){
-                console.log("Document error: "+data["error"]);
-            }
-            else{
-                console.log("Received document:\n"+data["text"]);
-                doc_version = data["version"];
-                pushTextToBuffer(buf, data["text"]);
-            }
-        }
-    });
-}
-
-function pushTextToBuffer(buf, text) {
-    var restoreCursor = preserveCursor(buf);
-
-    // clear buffer before inserting
-    buf.getLength(function (len) {
-        if (len)
-            buf.remove(0, len, insertText);
-        else
-            insertText();
-    });
-
-    function insertText(err) {
-        if (err) throw err;
-        buf.insert(0, text.toString(), function (err) {
-            if (err) throw err;
-            restoreCursor();
-            buf.insertDone();
-        });
-    }
 }
 
 // Preserve the cursor position.
@@ -93,26 +55,21 @@ function preserveCursor(buf, transaction) {
     }
 }
 
-var docs = {},
-    maxDocId = 1;
-
-function Doc(name) {
-    this.buffers = [];
+function Doc(name, id, version) {
+    this.buffer = 0;
     this.name = name;
-    this.id = maxDocId++;
+    this.id = id;
+    this.version = version;
 }
 Doc.prototype = {
     id: 0,
-
-    // Contents are addressed in netbeans by bytes,
-    // so if there is utf in the document then strings cannot be used for it,
-    // and it must be a Buffer
-    contents: new Buffer(0),
+    version: 0,
+    content: new Buffer(0),
 
     connectBuffer: function (buf) {
         console.log("Connecting a buffer");
         var self = this;
-        this.buffers.push(buf);
+        this.buffer = buf;
         buf.startDocumentListen();
 
         var removeInsert;
@@ -122,7 +79,7 @@ Doc.prototype = {
         // Try to combine a remove and insert into one operation.
         // This may be overkill.
         function combo(offset, removeLen, insertText) {
-            var removeBytes = self.contents.slice(offset,
+            var removeBytes = self.content.slice(offset,
                     offset + removeLen),
                 removeText = removeBytes.toString(),
                 insertBytes = new Buffer(insertText.concat("\n")),
@@ -260,16 +217,50 @@ Doc.prototype = {
         });
     },
 
+    // Contact the server to get the current version of the document
+    getDocumentFromServer: function(buf) {
+        console.log("Fetching document from server...");
+        $.ajax({
+            url: "http://"+domain+"/document/"+doc_id+"/"+token+".json",
+            success: function(data) {
+                if (typeof(data["error"]) != "undefined"){
+                    console.log("Document error: "+data["error"]);
+                }
+                else{
+                    console.log("Received document:\n"+data["text"]);
+                    doc_version = data["version"];
+                    doc.pushTextToBuffer(buf, data["text"]);
+                    doc_content = Buffer(data["text"]);
+                }
+            }
+        });
+    },
+    
+    pushTextToBuffer: function(buf, text) {
+        doc.content = new Buffer(text);
+        var restoreCursor = preserveCursor(buf);
+    
+        // clear buffer before inserting
+        buf.getLength(function (len) {
+            if (len)
+                buf.remove(0, len, insertText);
+            else
+                insertText();
+        });
+    
+        function insertText(err) {
+            if (err) throw err;
+            buf.insert(0, text.toString(), function (err) {
+                if (err) throw err;
+                restoreCursor();
+                buf.insertDone();
+            });
+        }
+    },
+
     disconnectBuffer: function (buf) {
         console.log("Disconnecting a buffer");
-        var bufs = this.buffers;
-        var i = bufs.indexOf(buf);
-        if (i != -1) bufs.splice(i, 1);
-        if (bufs.length == 0) {
-            // no more connected buffers. clean up
-            delete docs[this.name];
-            delete this.contents;
-        }
+        this.buffer = 0;
         buf.removeAllListeners("insert");
         buf.removeAllListeners("remove");
         buf.removeAllListeners("fileOpened");
@@ -289,7 +280,7 @@ Doc.prototype = {
 
         function removedOld(err) {
             if (err) throw err;
-            buf.insert(0, self.contents.toString(), function (err) {
+            buf.insert(0, self.content.toString(), function (err) {
                 // todo: fix this
                 if (err) throw err;
                 restoreCursor();
@@ -302,7 +293,7 @@ Doc.prototype = {
         console.log("Reading doc contents from buffer");
         var self = this;
         buf.getText(function (text) {
-            self.contents = new Buffer(text || 0);
+            self.content = new Buffer(text || 0);
             buf.insertDone();
         });
     },
@@ -319,35 +310,37 @@ Doc.prototype = {
         if (text == "") {
             text = "\n";
         } else {
-            this.contents = Buffer.concat([
-                this.contents.slice(0, offset),
+            this.content = Buffer.concat([
+                this.content.slice(0, offset),
                 bytes,
-                this.contents.slice(offset)
-            ], this.contents.length + length);
+                this.content.slice(offset)
+            ], this.content.length + length);
         }
+        /*
         this.buffers.forEach(function (buf) {
             if (buf != from) buf.insert(offset, text);
         });
+        */
     },
 
     remove: function (offset, length, from) {
-        if (offset + length >= this.contents.length) {
-            length = this.contents.length - offset;
+        if (offset + length >= this.content.length) {
+            length = this.content.length - offset;
         }
-        var removed = this.contents.slice(offset, offset + length).toString();
-        var hasNewline = (this.contents[offset+length] == 10) &&
-            this.contents[offset+length+1] == 10;
-            //(this.contents[offset+length-1] != 10);
+        var removed = this.content.slice(offset, offset + length).toString();
+        var hasNewline = (this.content[offset+length] == 10) &&
+            this.content[offset+length+1] == 10;
         console.log(offset +
             (hasNewline ? "~" : "-") + length + " " + removed);
             //"-" + length + " " + removed);
             //"-" + length);
 
-        if (length) this.contents = Buffer.concat([
-            this.contents.slice(0, offset),
-            this.contents.slice(offset + length)
-        ], this.contents.length - length);
+        if (length) this.content = Buffer.concat([
+            this.content.slice(0, offset),
+            this.content.slice(offset + length)
+        ], this.content.length - length);
 
+        /*
         this.buffers.forEach(function (buf) {
             // todo: make this work
                     //if (buf != from) preserveCursor(buf, function () {
@@ -355,6 +348,7 @@ Doc.prototype = {
             //});
             if (buf != from) buf.remove(offset, length || 1);
         });
+        */
     }
 };
 
@@ -362,15 +356,18 @@ function getDocNameForBuffer(buf) {
     return (buf.pathname.match(/[^\/]*$/) || 0)[0];
 };
 
+var doc = new Doc("Blublu", process.argv[4], 0);
+
 function launchServer(){
     var server = new nb.VimServer({
         debug: process.argv.indexOf("-v") != -1
     });
     server.on("clientAuthed", function (vim) {
-        vim.key
-    
         // Open this buffer for syncing.
-        vim.key("C-o", getDocumentFromServer);
+        vim.key("C-o", function (buf) {
+            doc.getDocumentFromServer(buf);
+            doc.connectBuffer(buf);
+        });
         
         vim.on("killed", function (buf) {
             var doc = buf && buf._doc;
@@ -379,11 +376,21 @@ function launchServer(){
     
         vim.on("disconnected", function () {
             console.log("Vim client disconnected");
-            vim.buffers.forEach(function (buf) {
-                var doc = buf && buf._doc;
-                if (doc) doc.disconnectBuffer(buf);
-            });
+            if (doc) doc.disconnectBuffer(doc.buffer);
         });
+        /*
+        vim.on("insert", function (buffer, offset, text) {
+            console.log("Inserted text at " + offset + ": " + text);
+            buffer.remove(offset, text.length);
+        });
+        vim.on("remove", function (buffer, offset, length) {
+            console.log("Removed " + length + " bytes at " + offset);
+            text_removed = doc_content.toString('utf8', offset, offset+length);
+            console.log("Text removed: "+text_removed);
+            buffer.insert(offset, text_removed);
+
+        });
+        */
     });
     
     server.listen(function () {
