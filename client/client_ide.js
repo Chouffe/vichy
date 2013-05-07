@@ -382,6 +382,7 @@ function getBlameForBuffer(buf) {
 
 function fillBufferWithBlame(buf, blame) {
 
+    var separator = '|';
     buf.getLength(function (length) {
 
         // Clean the buffer
@@ -392,7 +393,7 @@ function fillBufferWithBlame(buf, blame) {
 
         for(var i = 0; i < blame.length; i++)
         {
-            line = blame[i]["date"] + " - " + blame[i]["author"] + "\n";
+            line = blame[i]["date"] + " " + separator + " " + blame[i]["author"] + "\n";
             buf.insert(offset, line);
             offset += line.length
         }

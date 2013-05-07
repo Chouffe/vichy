@@ -4,6 +4,7 @@ if !has('python')
     finish
 endif
 
+
 function! VichyToggleHistory()
 " Toggles the History of the file in a new window
 
@@ -48,7 +49,7 @@ num_line = len(initial_buffer)
 vim.command("0")
 
 # Create a new window
-vim.command("30vnew {}".format(bufferHistoryName))
+vim.command("40vnew {}".format(bufferHistoryName))
 vim.command("setlocal nonumber")
 vim.command("nnoremap w :bwipeout %")
 vim.command("nnoremap x :bwipeout %")
@@ -60,9 +61,80 @@ history_window = vim.current.window
 # Call the plugin
 history_buffer[0] = 'vichyBlame'
 # Do something less ugly...
-vim.command("echom 'Loading the Blame..'")
+vim.command("echom 'Loading the vichy blame'")
 vim.command("sleep 3000m")
-# vim.command("<C-i>");
+
+
+# Set the cursor at the same position as the initial buffer
+history_window.cursor = initial_cursor_position
+
+# Bind the scrolling between the two windows
+vim.command("set scrollbind")
+vim.command("setlocal buftype=nowrite")
+vim.command("set readonly")
+vim.command("set hidden")
+
+# Move back to the initial window
+vim.command("wincmd l")
+# Set the cursor at the initial position
+initial_window.cursor = initial_cursor_position
+# Bind the scrolling between the two windows
+vim.command("set scrollbind")
+
+EOF
+
+call ColorBlame()
+
+endfunction
+
+function! VichyHistorySetInvisible()
+
+python << EOF
+
+import vim
+
+# Remove the buffer called vichy-history
+vim.command("bdelete {}".format(bufferHistoryName))
+vim.command("bwipeout {}".format(bufferHistoryName))
+
+EOF
+
+endfunction
+
+function! CloseIfOnlyHistoryLeft()
+
+python << EOF
+
+import vim
+import json
+import re
+
+
+if len(vim.buffers) == 1:
+
+    pattern = '^.*{}$'.format(bufferHistoryName)
+    prog = re.compile(pattern)
+
+    for b in vim.buffers:
+        vim.command("echom '{}'".format(b.name))
+        if prog.match(b.name):
+            vim.command("call VichyHistorySetInvisible()")
+            vim.command("q!")
+            break
+
+EOF
+
+endfunction
+
+" TODO: create a new syntax for this file
+function! ColorBlame()
+
+python << EOF
+
+import vim
+import json
+import re
+
 
 # # Create the JSON
 # d1 = {'author': 'Arthur', 'date': '2013-14-01:12:04'}
@@ -85,12 +157,29 @@ vim.command("sleep 3000m")
 # 
 # data = json.dumps(d)
 # hist = json.loads(data)
-# 
-# colors = ['blue', 'red', 'green', 'yellow']
-# date_color = 'red'
-# dates = set()
-# authors = set()
-# 
+
+bufferHistoryName = 'vichy-history'
+separator = '|';
+pattern = '^.*{}$'.format(bufferHistoryName)
+prog = re.compile(pattern)
+blameBuffer = None
+
+for b in vim.buffers:
+    if prog.match(b.name):
+        blameBuffer = b
+        break
+
+colors = ['blue', 'red', 'green', 'yellow']
+date_color = 'red'
+dates = set()
+authors = set()
+
+if blameBuffer is not None:
+
+    for line in blameBuffer:
+        info = line.replace(" ", "").strip().split(separator)
+        authors.add(info[-1])
+
 # # Fill the history buffer with the JSON data
 # for i, line in enumerate(hist):
 #     if i > 0:
@@ -108,71 +197,18 @@ vim.command("sleep 3000m")
 # 
 # # vim.command("highlight Date ctermfg={}".format(date_color))
 # 
-# for i, a in enumerate(authors):
-#     vim.command("syntax keyword Author{} {}".format(i, a))
-#     vim.command("highlight Author{} ctermfg={}".format(i, colors[i % len(colors)]))
+
+print authors
+for i, a in enumerate(authors):
+    vim.command("syntax keyword Author{} {}".format(i, a))
+    vim.command("highlight Author{} ctermfg={}".format(i, colors[i % len(colors)]))
+
 # 
 # # TODO: Fix the date coloring
 # for i, d in enumerate(dates):
 #     vim.command("syntax keyword Date{} {}".format(i, d))
 #     vim.command("highlight Date{} ctermfg={}".format(i, 'red'))
-
-# Set the cursor at the same position as the initial buffer
-history_window.cursor = initial_cursor_position
-
-# Bind the scrolling between the two windows
-vim.command("set scrollbind")
-vim.command("setlocal buftype=nowrite")
-vim.command("set readonly")
-vim.command("set hidden")
-
-# Move back to the initial window
-vim.command("wincmd l")
-# Set the cursor at the initial position
-initial_window.cursor = initial_cursor_position
-# Bind the scrolling between the two windows
-vim.command("set scrollbind")
-
-EOF
-
-endfunction
-
-function! VichyHistorySetInvisible()
-
-python << EOF
-
-import vim
-
-# Remove the buffer called vichy-history
-vim.command("bdelete {}".format(bufferHistoryName))
-vim.command("bwipeout {}".format(bufferHistoryName))
-
-EOF
-
-endfunction
-
-function! CloseIfOnlyHistoryLeft()
-
-echom "TODO closing"
-python << EOF
-
-import vim
-import json
-import re
-
-
-if len(vim.buffers) == 1:
-
-    bufferHistoryName = 'vichy-history'
-    pattern = '^.*{}$'.format(bufferHistoryName)
-    prog = re.compile(pattern)
-
-    for b in vim.buffers:
-        if prog.match(b.name):
-            vim.command("call VichyHistorySetInvisible()")
-            vim.command("q")
-            break
-
+# 
 EOF
 
 endfunction
