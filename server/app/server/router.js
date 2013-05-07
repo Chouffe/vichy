@@ -3,6 +3,8 @@ var CT = require('./modules/country-list');
 var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 
+var undo = require('../../lib/undo')
+
 module.exports = function(app) {
 
 // main login page //
@@ -195,6 +197,13 @@ module.exports = function(app) {
 			}
 	    });
 	});
+
+  app.post('/undo', function(req, res)
+    {
+      console.log("UNDO");
+      undo.parseUndo(req, res);
+    });
+        
 	
 	app.get('/mydocuments', function(req, res) {
 		var email = req.query["e"];
@@ -210,6 +219,8 @@ module.exports = function(app) {
 		})
 	});
 	
-	app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
+	app.get('*', function(req, res) { 
+    console.log("What ?");
+    res.render('404', { title: 'Page Not Found'}); });
 
 };
