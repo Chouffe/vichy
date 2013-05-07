@@ -53,7 +53,7 @@ function preserveCursor(buf, transaction) {
     if (!transaction) {
         return restoreCursor;
     }
-}
+};
 
 function Doc(name, id, version) {
     this.buffer = 0;
@@ -352,6 +352,42 @@ Doc.prototype = {
     }
 };
 
+function getBlameForBuffer(buf) {
+    $.ajax({
+        url: "http://"+domain+"/blame/"+doc_id+"/"+token+".json",
+        success: function(data) {
+            if (typeof(data["error"]) != "undefined"){
+                console.log("Login error: "+data["error"]);
+            }
+            else {
+                if (data["blame"]) {
+                    fillBufferWithBlame(buf, data["blame"]);
+                }
+            }
+        }
+    });
+};
+
+function fillBufferWithBlame(buf, blame) {
+
+    buf.getLength(function (length) {
+
+        // Clean the buffer
+        buf.remove(0, length);
+
+        var offset = 0;
+        var line = "";
+
+        for(var i = 0; i < blame.length; i++)
+        {
+            line = blame[i]["date"] + " - " + blame[i]["author"] + "\n";
+            buf.insert(offset, line);
+            offset += line.length
+        }
+
+    });
+};
+
 function getDocNameForBuffer(buf) {
     return (buf.pathname.match(/[^\/]*$/) || 0)[0];
 };
@@ -359,15 +395,20 @@ function getDocNameForBuffer(buf) {
 var doc = new Doc("Blublu", process.argv[4], 0);
 
 function launchServer(){
+
     var server = new nb.VimServer({
         debug: process.argv.indexOf("-v") != -1
     });
+
     server.on("clientAuthed", function (vim) {
         // Open this buffer for syncing.
         vim.key("C-o", function (buf) {
             doc.getDocumentFromServer(buf);
             doc.connectBuffer(buf);
         });
+
+        // Blame
+        vim.key("C-i", getBlameForBuffer);
         
         vim.on("killed", function (buf) {
             var doc = buf && buf._doc;
