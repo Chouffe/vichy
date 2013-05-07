@@ -10,6 +10,8 @@ var http = require('http');
 var app = express();
 
 var undo = require('./lib/undo');
+var auth_method = require('./lib/auth')
+var blame = require('./lib/blame')
 ShareJS = require('share').server;
 
 
@@ -20,7 +22,8 @@ ShareJSOpts = {
   db: {
     //type: "none"
     type: "mongo",
-    opsCollectionPerDoc: false
+    opsCollectionPerDoc: false,
+    auth: auth_method
   }
 };
 
@@ -52,6 +55,7 @@ app.configure('development', function(){
 
 ShareJS.attach(app, ShareJSOpts);
 undo.setModel(app.model);
+blame.setModel(app.model);
 
 require('./app/server/router')(app);
 
