@@ -1,6 +1,8 @@
 # import the Connect middleware (http://www.senchalabs.org/connect/)
 connect = require('connect')
 undo = require('./undo')
+auth_method = require('./auth')
+blame = require('./blame')
 
 # import the ShareJS server
 ShareJS = require('share').server
@@ -10,6 +12,7 @@ ShareJSOpts =
     browserChannel:     # set pluggable transport to BrowserChannel
         cors: "*"
     db: {type: "mongo", opsCollectionPerDoc: false} # persistence
+    auth: auth_method
     #db: {type: "none"}
 
 # create a Connect server
@@ -36,6 +39,9 @@ ShareJS.attach(server, ShareJSOpts)
 
 server.use(undo.parseUndo)
 undo.setModel(server.model)
+
+blame.setModel server.model
+server.use blame.parseBlame
 
 # set our server port and start the server
 port = 8000

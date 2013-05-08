@@ -2,16 +2,22 @@
     <head>
         <title>ShareJS Tutorial</title>
         <!-- NEW -->
+        <link href="style.css" rel="stylesheet" type="text/css">
         <script src="bcsocket.js"></script>             <!-- add transport -->
         <script src="webclient/share.js"></script>      <!-- ShareJS -->
         <script src="webclient/textarea.js"></script>   <!-- helper to attach textarea to ShareJS server -->
         <script src="work/undo.js"></script> <!-- provide undo function -->
+        <script src="work/blame.js"></script> <!-- provide blame function -->
         <!-- /NEW -->
     </head>
     <body>
         <h1>ShareJS Tutorial</h1>
         <button onclick="undo()">Undo</button>
-        <textarea id='sharetext' rows="20" cols="50" ></textarea>
+        <button onclick="blame()">Blame</button>
+        <br>
+        <div id='Blame' class='blame'>
+        </div>
+        <textarea id='sharetext' class='text' rows='20' cols='50'></textarea>
         <!-- NEW -->
         <script>
             // get the textarea element 

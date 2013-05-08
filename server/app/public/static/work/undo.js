@@ -12,7 +12,7 @@ function undo()
             var doc_name = encodeURIComponent("test2");
             var version = doc.version;
             alert(version);
-            xhr.open("POST", "http://localhost:8000/undo", true);
+            xhr.open("POST", "http://localhost:8088/undo", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.send("doc_name="+doc_name+"&version="+version);
             xhr.onreadystatechange = function() {

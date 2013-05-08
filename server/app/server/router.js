@@ -3,6 +3,9 @@ var CT = require('./modules/country-list');
 var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 
+var undo = require('../../lib/undo')
+var blame = require('../../lib/blame')
+
 module.exports = function(app) {
 
 // main login page //
@@ -25,6 +28,7 @@ module.exports = function(app) {
 	});
 	
 	app.post('/', function(req, res){
+	    console.log(req.param('user'), req.param('pass'));
 		AM.manualLogin(req.param('user'), req.param('pass'), function(e, o){
 			if (!o){
 				res.send(e, 400);
@@ -261,6 +265,33 @@ module.exports = function(app) {
 			}
 	    });
 	});
+
+  app.post('/undo', function(req, res)
+    {
+      console.log("UNDO");
+      undo.parseUndo(req, res);
+    });
+  
+  app.get('/blame/:docname.json', function(req, res){
+      if (req.session.user == null){
+          res.send({'error': 'not logged in'}, 400);
+      } else{
+          console.log("BLAME");
+          blame.parseBlame(req, res);
+      }
+  });
+
+  app.get('/login/:user/:password.json', function(req, res){
+      console.log("LOGIN");
+      AM.manualLogin(req.params.user, req.params.password, function(e, o){
+          if (!o){
+              res.send(e, 400);
+          } else{
+              req.session.user = o;
+              res.send(o, 200);
+          }
+      });
+    });
 	
 	/*app.get('/mydocuments', function(req, res) {
 		var email = req.query["e"];
@@ -276,6 +307,8 @@ module.exports = function(app) {
 		})
 	});*/
 	
-	app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
+	app.get('*', function(req, res) { 
+    console.log("What ?");
+    res.render('404', { title: 'Page Not Found'}); });
 
 };

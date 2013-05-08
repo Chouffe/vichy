@@ -8,8 +8,11 @@
 var express = require('express');
 var http = require('http');
 var app = express();
+var store  = new express.session.MemoryStore;
 
 var undo = require('./lib/undo');
+var auth_method = require('./lib/auth')
+var blame = require('./lib/blame')
 ShareJS = require('share').server;
 
 
@@ -20,10 +23,10 @@ ShareJSOpts = {
   db: {
     //type: "none"
     type: "mongo",
-    opsCollectionPerDoc: false
-  }
+    opsCollectionPerDoc: false,
+  },
+  auth: auth_method
 };
-
 
 app.configure(function(){
 	app.set('port', 8088);
@@ -34,7 +37,7 @@ app.configure(function(){
   app.use(express.logger('dev'));
 	app.use(express.bodyParser());
 	app.use(express.cookieParser());
-	app.use(express.session({ secret: 'super-duper-secret-secret' }));
+	app.use(express.session({ secret: 'super-duper-secret-secret', store: store}));
 	app.use(express.methodOverride());
 	app.use(require('stylus').middleware({ src: __dirname + '/app/public' }));
 	app.use(express.static(__dirname + '/app/public'));
@@ -52,6 +55,8 @@ app.configure('development', function(){
 
 ShareJS.attach(app, ShareJSOpts);
 undo.setModel(app.model);
+blame.setModel(app.model);
+auth_method.setStore(store);
 
 require('./app/server/router')(app);
 
