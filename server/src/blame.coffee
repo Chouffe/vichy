@@ -56,16 +56,15 @@ delet = (lines, op, meta) ->
 
 blame = (doc_name, callback) ->
     lines = [{start:0, end:0, author:null, ended: false}]
-    console.log(doc_name);
     shareJSModel.getOps doc_name, 0, (error, ops) ->
         for operation in ops
             op = operation.op[0]
-            console.log op
+            #console.log op
             if op? and op.i?
                 insert lines, op, operation.meta
             if op? and op.d?
                 delet lines, op, operation.meta
-            console.log(lines)
+            #console.log(lines)
         callback(lines)
 
 callBlame = (req, res) ->
