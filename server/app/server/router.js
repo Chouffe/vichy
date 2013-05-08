@@ -285,7 +285,7 @@ module.exports = function(app) {
       console.log("LOGIN");
       AM.manualLogin(req.params.user, req.params.password, function(e, o){
           if (!o){
-              res.send(e, 400);
+              res.send({'error': e}, 400);
           } else{
               req.session.user = o;
               res.send(o, 200);
