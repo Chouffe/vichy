@@ -3,11 +3,20 @@ cookie = require 'cookie'
 Store = null
 
 module.exports = auth = (agent, action) ->
+    console.log agent
     cookies = cookie.parse(agent.headers.cookie) if agent.headers.cookie?
     if action.type in ['read', 'create', 'update', 'connect']
-        sid = cookies['connect.sid'] if cookies?
-        sid = sid.split('.')[0]
-        Store.get sid.substr(2), (err, session) ->
+        if agent.authentication?
+            sid = agent.authentication
+            console.log(sid)
+        else
+            sid = cookies['connect.sid'] if cookies?
+            if not sid?
+                action.reject()
+                return
+        sid = sid.split('.')[0].substr(2)
+        console.log(sid)
+        Store.get sid, (err, session) ->
             if err or not session? or not session.user?
                 action.reject()
                 return
