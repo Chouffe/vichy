@@ -1,6 +1,7 @@
 cookie = require 'cookie'
 
 module.exports = auth = (agent, action) ->
+    console.log(agent)
     cookies = cookie.parse(agent.headers.cookie) if agent.headers.cookie?
     if action.type == 'connect'
         agent.name = cookies.user if cookies? and cookies.user?

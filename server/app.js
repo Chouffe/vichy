@@ -23,8 +23,8 @@ ShareJSOpts = {
     //type: "none"
     type: "mongo",
     opsCollectionPerDoc: false,
-    auth: auth_method
-  }
+  },
+  auth: auth_method
 };
 
 

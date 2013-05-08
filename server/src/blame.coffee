@@ -56,15 +56,16 @@ delet = (lines, op, meta) ->
 
 blame = (doc_name, callback) ->
     lines = [{start:0, end:0, author:null, ended: false}]
+    console.log(doc_name);
     shareJSModel.getOps doc_name, 0, (error, ops) ->
         for operation in ops
             op = operation.op[0]
-            #console.log op
+            console.log op
             if op? and op.i?
                 insert lines, op, operation.meta
             if op? and op.d?
                 delet lines, op, operation.meta
-            #console.log(lines)
+            console.log(lines)
         callback(lines)
 
 callBlame = (req, res) ->
@@ -73,20 +74,14 @@ callBlame = (req, res) ->
       string: ""
 
     # TODO: call getOps (version given by req), then submit the inverse operation
-    queryData = ""
+    queryData = req.body
 
-    req.on('data', (data) ->
-        queryData += data)
-
-    req.on('end', (end) ->
-        POST = qs.parse(queryData)
-        doc_name = POST.doc_name
-        version = POST.version
-        blame doc_name, (lines)->
-            res.end JSON.stringify(lines) + '\n'
+    doc_name = queryData.doc_name
+    version = queryData.version
+    blame doc_name, (lines)->
+        res.end JSON.stringify(lines) + '\n'
 
     res.writeHead 200, {'Content-Type': 'application/json'}
-    )
 
 parseBlame = (req, res, next) ->
     console.log(req.url)

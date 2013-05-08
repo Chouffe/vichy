@@ -4,6 +4,7 @@ var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
 
 var undo = require('../../lib/undo')
+var blame = require('../../lib/blame')
 
 module.exports = function(app) {
 
@@ -202,6 +203,12 @@ module.exports = function(app) {
     {
       console.log("UNDO");
       undo.parseUndo(req, res);
+    });
+  
+  app.post('/blame', function(req, res)
+    {
+      console.log("BLAME");
+      blame.parseBlame(req, res);
     });
         
 	
