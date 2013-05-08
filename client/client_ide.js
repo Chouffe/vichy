@@ -1,6 +1,7 @@
 var util = require("util"),
     EventEmitter = require("events").EventEmitter,
     nb = require("vim-netbeans"),
+    cookie = require("cookie"),
     $ = require("jquery");
 
 // Check arguments
@@ -11,23 +12,26 @@ if (process.argv.length < 7) {
 }
 
 var domain = process.argv[2]+":"+process.argv[3];
+var hostname = process.argv[2];
+var port = process.argv[3];
 var token = login(process.argv[4], process.argv[5]);
 var doc_id = process.argv[6];
 var doc_version = 0;
 var doc_content = Buffer(0);
+var cookies;
 
 // Log the current user on the server
 function login(username, password) {
     console.log("Login...");
     $.ajax({
         url: "http://"+domain+"/login/"+username+"/"+password+".json",
-        success: function(data) {
+        success: function(data, textStatus, xhr) {
             if (typeof(data["error"]) != "undefined"){
                 console.log("Login error: "+data["error"]);
             }
             else{
-                console.log("Received token: "+data["token"]);
-                token = data["token"];
+                cookies = cookie.parse(xhr.getAllResponseHeaders('set-cookie'));
+                console.log("Cookie: "+cookies);
                 launchServer();
             }
         }
