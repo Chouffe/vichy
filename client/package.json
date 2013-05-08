@@ -1,0 +1,25 @@
+{
+    "name": "Client",
+    "version": "0.0.0",
+    "description": "Our client project",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": "",
+    "author": "The vichy team <projectvichy@gmail.com>",
+    "license": "BSD",
+    "dependencies" : {
+        "connect"        :  "2.x",
+        "share"          :  "https://github.com/josephg/ShareJS/tarball/master",
+        "cookie"         :  "~0.1.0",
+        "express"        :  "3.0.6",
+        "vim-netbeans"   :  "1.0.0",
+        "jquery"         :  "1.8.3"
+    },
+
+    "engines": {
+        "node": "0.8.14",
+        "npm":  "1.1.65"
+    }
+}
