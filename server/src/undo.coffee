@@ -55,7 +55,7 @@ callUndo = (req, res) ->
     console.log("On end")
     console.log(queryData)
     doc_name = queryData.doc_name
-    version = queryData.version
+    version = parseInt queryData.version
     start = version - UNDO_PARAM
     start = 0 if start < 0
     shareJSModel.getOps(doc_name, start, version, (error, ops) ->
