@@ -218,6 +218,57 @@ Doc.prototype = {
     },
 
     // Contact the server to get the current version of the document
+    sendInsertToServer: function(buf, offset, text) {
+        console.log("Send insert at "+offset+": "+text);
+        console.log("http://"+domain+"/insert/"+doc.id+"/"+doc.version+"/"+offset+"/"+text+"/"+token+".json");
+        $.ajax({
+            url: "http://"+domain+"/insert/"+doc.id+"/"+doc.version+"/"+offset+"/"+text+"/"+token+".json",
+            success: function(data) {
+                if (typeof(data["error"]) != "undefined"){
+                    console.log("Document error: "+data["error"]);
+                }
+                else{
+                    doc.applyActionsFromServer(buf, actions);
+                }
+            }
+        });
+    },
+
+    // Contact the server to get the current version of the document
+    sendRemoveToServer: function(buf, offset, length) {
+        console.log("Send insert at "+offset+": "+text);
+        console.log("http://"+domain+"/remove/"+doc.id+"/"+doc.version+"/"+offset+"/"+length+"/"+token+".json");
+        $.ajax({
+            url: "http://"+domain+"/remove/"+doc.id+"/"+doc.version+"/"+offset+"/"+length+"/"+token+".json",
+            success: function(data) {
+                if (typeof(data["error"]) != "undefined"){
+                    console.log("Document error: "+data["error"]);
+                }
+                else{
+                    doc.applyActionsFromServer(buf, actions);
+                }
+            }
+        });
+    },
+
+    applyActionsFromServer: function(buf, actions) {
+        var length = actions.length, a = null;
+        for (var i=0; i<length; i++) {
+            a = actions[i];
+            if (a["new_version"] <= doc.version)
+                continue;
+            doc.version = a["new_version"];
+            if (a["action"] == "remove") {
+                doc.buffer.write("", a["offset"], a["length"]);
+            }
+            else if (a["action"] == "insert") {
+                doc.buffer.write(a["text"], a["offset"], 0);
+            }
+            console.log(doc.toString());
+        }
+    },
+
+    // Contact the server to get the current version of the document
     getDocumentFromServer: function(buf) {
         console.log("Fetching document from server...");
         $.ajax({
@@ -229,6 +280,7 @@ Doc.prototype = {
                 else{
                     console.log("Received document:\n"+data["text"]);
                     doc_version = data["version"];
+                    doc.version = data["version"];
                     doc.pushTextToBuffer(buf, data["text"]);
                     doc_content = Buffer(data["text"]);
                 }
