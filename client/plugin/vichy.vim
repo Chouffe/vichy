@@ -4,11 +4,8 @@ if !has('python')
     finish
 endif
 
-
 function! Vichy()
 
-    " execute "so " . expand("<sfile>:p:h") . "/history.vim"
-    " source history.vim
     nnoremap <buffer> - :call VichyToggleBlame()<enter>
     autocmd WinEnter * call CloseIfOnlyBlameLeft()
 
@@ -92,8 +89,6 @@ vim.command("set scrollbind")
 
 EOF
 
-call ColorBlame()
-
 endfunction
 
 function! VichyBlameSetInvisible()
@@ -134,114 +129,5 @@ if len(vim.buffers) == 1:
 EOF
 
 endfunction
-
-" TODO: create a new syntax for this file
-function! ColorBlame()
-
-python << EOF
-
-import vim
-import json
-import re
-
-
-# # Create the JSON
-# d1 = {'author': 'Arthur', 'date': '2013-14-01:12:04'}
-# d2 = {'author': 'Paul', 'date': '2013-14-01:12:04'}
-# d3 = {'author': 'Romain', 'date': '2013-14-01:12:04'}
-# d4 = {'author': 'Bertrand', 'date': '2013-14-01:12:04'}
-# 
-# d = []
-# for i in xrange(num_line):
-# 
-#     if i % 4 == 0:
-#         d.append(d1)
-#     elif i % 4 == 1:
-#         d.append(d2)
-#     elif i % 4 == 2:
-#         d.append(d3)
-#     else:
-#         d.append(d4)
-# 
-# 
-# data = json.dumps(d)
-# hist = json.loads(data)
-
-separator = '|';
-pattern = '^.*{}$'.format(bufferBlameName)
-prog = re.compile(pattern)
-blameBuffer = None
-
-for b in vim.buffers:
-    if prog.match(b.name):
-        blameBuffer = b
-        break
-
-colors = ['blue', 'red', 'green', 'yellow']
-date_color = 'red'
-dates = set()
-authors = set()
-
-if blameBuffer is not None:
-
-    for line in blameBuffer:
-        info = line.replace(" ", "").strip().split(separator)
-        authors.add(info[-1])
-
-# # Fill the history buffer with the JSON data
-# for i, line in enumerate(hist):
-#     if i > 0:
-#         # Add a new empty line
-#         vim.command("put =''")
-# 
-#     if line['author'] not in authors:
-#         authors.add(line['author'])
-# 
-#     if line['date'] not in dates:
-#         dates.add(line['date'])
-# 
-#     # Add the history line
-#     history_buffer[i] = "{} - {}".format(line['date'], line['author'])
-# 
-# # vim.command("highlight Date ctermfg={}".format(date_color))
-# 
-
-print authors
-for i, a in enumerate(authors):
-    vim.command("syntax keyword Author{} {}".format(i, a))
-    vim.command("highlight Author{} ctermfg={}".format(i, colors[i % len(colors)]))
-
-# 
-# # TODO: Fix the date coloring
-# for i, d in enumerate(dates):
-#     vim.command("syntax keyword Date{} {}".format(i, d))
-#     vim.command("highlight Date{} ctermfg={}".format(i, 'red'))
-# 
-EOF
-
-endfunction
-
-" function! VichySetLogin(login, password)
-" " Set Login/Password in a .file to enable the server connection
-" 
-" python << EOF
-" 
-" import vim
-" import json
-" 
-" 
-" login = vim.eval("a:login")
-" password = vim.eval("a:password")
-" data = {'login': login, 'password': password}
-" data_json = json.dumps(data)
-" # print data_json
-" 
-" # TODO: Set an absolute path
-" with open('.credentials', 'w') as f:
-"     f.write(data_json)
-" 
-" EOF
-" 
-" endfunction
 
 call Vichy()
