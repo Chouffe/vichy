@@ -7,7 +7,8 @@ endif
 function! Vichy()
 
     nnoremap <buffer> - :call VichyToggleBlame()<enter>
-    autocmd WinEnter * call CloseIfOnlyBlameLeft()
+    " FIXME
+    " autocmd WinEnter * call CloseIfOnlyBlameLeft()
 
 endfunction
 
@@ -49,7 +50,6 @@ import re
 initial_buffer = vim.current.buffer
 initial_window = vim.current.window
 initial_cursor_position = initial_window.cursor
-num_line = len(initial_buffer)
 
 # Move the cursor to the top of the file
 vim.command("0")
@@ -105,6 +105,7 @@ EOF
 
 endfunction
 
+" FIXME
 function! CloseIfOnlyBlameLeft()
 
 python << EOF
