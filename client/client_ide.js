@@ -380,20 +380,22 @@ function fillBufferWithBlame(buf, blame) {
     buf.getLength(function (length) {
 
         // Clean the buffer
-        buf.remove(0, length);
+        buf.remove(0, length, function(error) {
+            if (error) throw error;
 
-        var offset = 0;
-        var line = "";
+            var offset = 0;
+            var line = "";
 
-        for(var i = 0; i < blame.length; i++)
-        {
-            line = blame[i]["date"] + " " + separator + " " + blame[i]["author"] + "\n";
-            buf.insert(offset, line);
-            offset += line.length
-        }
+            for(var i = 0; i < blame.length; i++)
+            {
+                line = blame[i]["date"] + " " + separator + " " + blame[i]["author"] + "\n";
+                buf.insert(offset, line);
+                offset += line.length
+            }
 
-    buf.insertDone();
+            buf.insertDone();
 
+        });
     });
 };
 
