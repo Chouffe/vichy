@@ -1,4 +1,3 @@
-hat = require 'hat'
 cookie = require 'cookie'
 
 module.exports = auth = (agent, action) ->
