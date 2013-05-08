@@ -52,6 +52,10 @@ $(document).ready(function(){
 	$('.modal-mydocs').modal({ show : false, keyboard : true, backdrop : true });
 	$('.modal-mydocs .modal-header h3').text('My documents');
 	$('.modal-mydocs .modal-body p').html('Manage your document rights');
+	/*for (var i = 0; i < documents.length; i++) {
+        $('#doclist-cg').append($('<option>').text(docments[i]).attr('value', documents[i]));
+    }*/
+	
 	$('.modal-mydocs .cancel').html('Cancel');
 	$('.modal-mydocs .submit').html('Submit');
 

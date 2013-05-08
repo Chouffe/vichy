@@ -36,7 +36,13 @@ function HomeController()
 			type: 'POST',
 			data: { id: $('#userId').val(), doc: $('#name-doc').val() },
 			success: function(data){
-	 			that.showLockedAlert('Your document has been created.');
+				console.log(data);
+				if(data=='ok')
+	 				that.showLockedAlert('Your document has been created.');
+	 			else if(data=='docExists')
+	 				that.showLockedError('The name of your document already exists, use another name.');
+	 			else
+	 				that.showLockedError('Unknown error.');
 			},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
@@ -48,12 +54,19 @@ function HomeController()
 	{
 		$('.modal-mydocs').modal('hide');
 		var that = this;
+		console.log("test :");
+		console.log($('#document-list').val());
+		console.log($('#name-user').val());
+		
 		$.ajax({
 			url: '/mydocuments',
 			type: 'POST',
-			data: { id: $('#userId').val(), doc: $('.modal-mydocs #clist-cg.control-group .controls').val(), user: $('.modal-mydocs #name-cg.control-group .controls').val() },
+			data: { id: $('#userId').val(), doc: $('#document-list').val(), user: $('#name-user').val() },
 			success: function(data){
-	 			that.showLockedAlert('The user has been added to your document.<br>Redirecting you back to the homepage.');
+			    if(data == 'noUser')
+			        that.showLockedError("The name of the user you want to add doesn't exist.");
+			    else
+	 			    that.showLockedAlert('The user has been added to your document.<br>Redirecting you back to the homepage.');
 			},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
@@ -99,6 +112,16 @@ function HomeController()
 		$('.modal-alert .modal-header h3').text('Success!');
 		$('.modal-alert .modal-body p').html(msg);
 		$('.modal-alert').modal('show');
+		$('.modal-alert button').click(function(){window.location.href = '/';})
+		setTimeout(function(){window.location.href = '/';}, 3000);
+	}
+	
+	this.showLockedError = function(msg){
+		$('.modal-alert').modal({ show : false, keyboard : false, backdrop : 'static' });
+		$('.modal-alert .modal-header h3').text('Error!');
+		$('.modal-alert .modal-body p').html(msg);
+		$('.modal-alert').modal('show');
+		$('.modal-alert button').addClass('btn-danger');
 		$('.modal-alert button').click(function(){window.location.href = '/';})
 		setTimeout(function(){window.location.href = '/';}, 3000);
 	}

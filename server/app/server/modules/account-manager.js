@@ -94,13 +94,49 @@ exports.updateAccount = function(newData, callback)
 
 exports.addNewDoc = function(newData, callback)
 {
-	documents.save({doc: newData.doc, user: newData.user});
+	accounts.findOne({'user':newData.user}, function(e, o){
+		console.log(newData.user);
+		if(o == null){
+			callback(e,'userNodFound');
+		}
+		else {
+			documents.findOne({'doc': newData.doc, 'users':newData.user}, function(e, o) {
+				if(o != null) {
+					callback(e,'docExists');
+				}
+				else {
+					documents.save({doc: newData.doc, users: [newData.user]}, function(e, o) {});
+					accounts.update({user:newData.user}, {'$push': {docs : newData.doc} }, function(e, o) { callback(e,'ok'); });
+				}
+			});
+		}
+	});
 }
+
+/*exports.getDocs = function(newData)
+{
+	accounts.find({"user":newData.user}, {"docs":1, _id:0}, function(e, o) {
+	    console.log('bizarree');
+	    console.log(e);
+	    console.log(o);
+	    return o;
+	});
+}*/
 
 exports.addUser = function(newData, callback)
 {
     accounts.findOne({'user':newData.user}, function(){
-	    documents.update({'doc': newData.doc}, {'$push': {'users': newData.user} });
+	    
+	});
+	accounts.findOne({'user':newData.newUser}, function(e, o){
+		console.log(newData.user);
+		if(o == null){
+			callback(e,'noUser');
+		}
+		else {
+			documents.update({'doc': newData.doc}, {'$push': {'users': newData.newUser} }, function(e, o) {});
+			accounts.update({'user': newData.newUser}, {'$push': {'docs': newData.doc} }, function(e,o) { callback(e,'ok'); });
+		}
 	});
 }
 

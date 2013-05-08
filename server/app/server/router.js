@@ -45,11 +45,33 @@ module.exports = function(app) {
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
-	    }   else{
+	    }   else {
+	        DL = req.session.user.docs;
+	        if(DL!=null) {
+	            var autre = "[";
+	            var premier = 1;
+	            for(var i=0;i<DL.length;i++) {
+	                if(premier==0) {
+	                    autre = autre + ', ';
+	                }
+	                autre = autre + "{ doc: '"+DL[i]+"' }";
+	                premier = 0;
+	            }
+	            autre = autre + ']';
+	        	DL = JSON.stringify(eval('('+autre+')'));
+	        	DL = JSON.parse(DL);
+	    	}
+	    	else {
+	            DL = "[]";
+	            DL = JSON.stringify(eval('('+DL+')'));
+	        	DL = JSON.parse(DL);
+	        }       
+	        
 			res.render('home', {
 				title : 'Control Panel',
 				countries : CT,
-				udata : req.session.user
+				udata : req.session.user,
+				documents : DL
 			});
 	    }
 	});
@@ -185,17 +207,27 @@ module.exports = function(app) {
 // Add a new document
 
 	app.post('/newdoc', function(req, res){
-		console.log(req.param('doc'), req.param('user'));
 		AM.addNewDoc({
 			doc 	: req.param('doc'),
-			user 	: req.param('user')
+			user 	: req.cookies.user
 			
 			}, function(e, obj){
-			if (!e){
-				//res.clearCookie('user');
-				//res.clearCookie('pass');
-	            //req.session.destroy(function(e){ res.send('ok', 200); });
+			
+			if (!e){				
+				if(obj=='docExists') {
+					//console.log('doc already exists for this user');
+					res.send('docExists', 200);
+				}
+				else if(obj=='userNotFound') {
+					//console.log('user not found');
+					res.send('userNotFound', 200);
+				}
+				else {
+					res.send('ok', 200);
+				}
+				
 			}	else{
+				
 				res.send('record not found', 400);
 			}
 	    });
@@ -203,17 +235,32 @@ module.exports = function(app) {
 	
 // Add a user to an existing document
 
-    /*app.post('/mydocuments', function(req, res){
-		AM.addUser({req.body.id, req.body.user, req.body.doc}, function(e, obj){
-			if (!e){
-				res.clearCookie('user');
-				res.clearCookie('pass');
-	            req.session.destroy(function(e){ res.send('ok', 200); });
+    app.post('/mydocuments', function(req, res){
+        console.log('test   '+req.param('doc'));
+        console.log(req.param('user'));
+        console.log(req.cookies.user);
+		AM.addUser({
+			doc 	: req.param('doc'),
+			newUser : req.param('user'),
+			user    : req.cookies.user			
+			
+			}, function(e, obj){
+			
+			if (!e){				
+				if(obj=='noUser') {
+					//console.log('doc already exists for this user');
+					res.send('noUser', 200);
+				}
+				else {
+					res.send('ok', 200);
+				}
+				
 			}	else{
+				
 				res.send('record not found', 400);
 			}
 	    });
-	});*/
+	});
 	
 	/*app.get('/mydocuments', function(req, res) {
 		var email = req.query["e"];

@@ -6,16 +6,17 @@
     div.modal-body
         p
         fieldset
-            #clist-cg.control-group
+            #doclist-cg.control-group
                 label.control-label(for='document-list') My documents
                 .controls
-                    select#document-list(name='country')
-                        each item in countries
-                            option(selected=item.name == user.country)= item.name
+                    select#document-list(name='docs')
+                        option(selected=true) Choose one of your document
+                        each item in documents
+                            option(selected=false)= item.doc
             #name-cg.control-group
                 label.control-label(for='name-tf') Add a user to the document
                 .controls
-                    input#name-tf.input-xlarge(type='text', name='name', value= user.name)
+                    input#name-user.input-xlarge(type='text', name='name', value= 'username')
     div.modal-footer
         button(data-dismiss="modal").cancel.btn Cancel
         button.submit.btn Ok
