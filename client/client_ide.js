@@ -4,15 +4,15 @@ var util = require("util"),
     $ = require("jquery");
 
 // Check arguments
-if (process.argv.length < 5) {
+if (process.argv.length < 7) {
     console.log("Syntax:")
-    console.log("    node client_ide.js <username> <password> <document_id>")
+    console.log("    node client_ide.js <host> <port> <username> <password> <document_id>")
     return
 }
 
-var domain = "localhost:3000";
-var token = login(process.argv[2], process.argv[3]);
-var doc_id = process.argv[4];
+var domain = process.argv[2]+":"+process.argv[3];
+var token = login(process.argv[4], process.argv[5]);
+var doc_id = process.argv[6];
 var doc_version = 0;
 var doc_content = Buffer(0);
 
