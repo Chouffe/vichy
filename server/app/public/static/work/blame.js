@@ -19,19 +19,19 @@ function blame(){
             var xhr = new XMLHttpRequest();
             var doc_name = encodeURIComponent("test2");
             var version = doc.version;
-            xhr.open("POST", "http://localhost:8088/blame", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.send("doc_name="+doc_name+"&version="+version);
             xhr.onreadystatechange = function() {
                 //TODO: Done = close
                 if (xhr.readyState==4 && xhr.status==200){
                     bl = document.getElementById("Blame");
                     result = JSON.parse(xhr.responseText);
+                    result = result.blame;
                     for(j = 0; j < result.length; j++){
                         bl.children[j].textContent = result[j].author;
                     }
                 }
             };
+            xhr.open("GET", "/blame/"+doc_name+".json", true);
+            xhr.send();
         }
     });
 }

@@ -6,6 +6,7 @@ insert = (lines, op, meta) ->
     buff = op.i
     p = op.p
     name = meta.name
+    date = meta.ts
     for i in [0..lines.length-1]
         #console.log(i)
         line = lines[i]
@@ -20,6 +21,7 @@ insert = (lines, op, meta) ->
                 lines.splice(++i, 0, line)
             line.end += buff.length
             line.author = name
+            line.date = date
             break
     if ++i < lines.length
         for j in [i..lines.length-1]
@@ -31,6 +33,7 @@ delet = (lines, op, meta) ->
     buff = op.d
     p = op.p
     name = meta.name
+    date = meta.ts
     for i in [0..lines.length-1]
         #console.log(i)
         line = lines[i]
@@ -42,16 +45,16 @@ delet = (lines, op, meta) ->
                 line.end--
                 removed = lines.splice(i+1, dlines.length-1)
                 last_line = removed[removed.length-1]
-                if dlines[dlines.length-1].length > 0
-                    line.end += last_line.end - last_line.start - dlines[dlines.length-1].length
+                line.end += last_line.end - last_line.start - dlines[dlines.length-1].length
                 line.ended = last_line.ended
             line.author = name
+            line.date = date
             break
     if ++i < lines.length
         for j in [i..lines.length-1]
-            line = lines[i]
-            line.start -= op.i.length
-            line.end -= op.i.length
+            line = lines[j]
+            line.start -= op.d.length
+            line.end -= op.d.length
 
 
 blame = (doc_name, callback) ->
@@ -59,38 +62,31 @@ blame = (doc_name, callback) ->
     shareJSModel.getOps doc_name, 0, (error, ops) ->
         for operation in ops
             op = operation.op[0]
-            #console.log op
+            console.log op
             if op? and op.i?
                 insert lines, op, operation.meta
             if op? and op.d?
                 delet lines, op, operation.meta
-            #console.log(lines)
+            console.log(lines)
         callback(lines)
 
 callBlame = (req, res) ->
     console.log("Entering CallBlame")
-    obj =
-      string: ""
 
-    # TODO: call getOps (version given by req), then submit the inverse operation
-    queryData = req.body
-
-    doc_name = queryData.doc_name
-    version = queryData.version
+    doc_name = req.params.docname
     blame doc_name, (lines)->
-        res.end JSON.stringify(lines) + '\n'
+        result = blame: []
+        i = 1
+        for line in lines
+            result.blame.push {line: i++, author: line.author, date: new Date(line.date)}
+        res.end JSON.stringify(result) + '\n'
 
     res.writeHead 200, {'Content-Type': 'application/json'}
 
 parseBlame = (req, res, next) ->
     console.log(req.url)
-    if req.url == "/blame"
-      console.log "Entering blame handler"
-      switch req.method
-        when 'POST' then callBlame req, res
-        else next()
-    else
-      next()
+    console.log "Entering blame handler"
+    callBlame req, res
 
 setModel = (model) ->
     console.log "Share model set"
