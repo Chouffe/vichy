@@ -37,8 +37,17 @@ $(document).ready(function(){
 	$('#account-form-btn1').addClass('btn-danger');
 	$('#account-form-btn2').html('Update');
 	$('#account-form-btn3').html('My documents');
-	$('#account-form-btn4').html('New Document');
+	$('#account-form-btn4').html('New Doc');
+	$('#account-form-btn5').html('Open Doc');
 	
+// setup open document window
+
+	$('.modal-opendoc').modal({ show : false, keyboard : true, backdrop : true });
+	$('.modal-opendoc .modal-header h3').text('My documents');
+	$('.modal-opendoc .modal-body p').html('Open a document in your list');
+	$('.modal-opendoc .cancel').html('Cancel');
+	$('.modal-opendoc .submit').html('Open');
+
 // setup the new document window
 
     $('.modal-newdoc').modal({ show : false, keyboard : true, backdrop : true });
@@ -52,10 +61,6 @@ $(document).ready(function(){
 	$('.modal-mydocs').modal({ show : false, keyboard : true, backdrop : true });
 	$('.modal-mydocs .modal-header h3').text('My documents');
 	$('.modal-mydocs .modal-body p').html('Manage your document rights');
-	/*for (var i = 0; i < documents.length; i++) {
-        $('#doclist-cg').append($('<option>').text(docments[i]).attr('value', documents[i]));
-    }*/
-	
 	$('.modal-mydocs .cancel').html('Cancel');
 	$('.modal-mydocs .submit').html('Submit');
 

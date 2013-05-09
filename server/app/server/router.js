@@ -240,9 +240,6 @@ module.exports = function(app) {
 // Add a user to an existing document
 
     app.post('/mydocuments', function(req, res){
-        console.log('test   '+req.param('doc'));
-        console.log(req.param('user'));
-        console.log(req.cookies.user);
 		AM.addUser({
 			doc 	: req.param('doc'),
 			newUser : req.param('user'),
@@ -264,6 +261,25 @@ module.exports = function(app) {
 				res.send('record not found', 400);
 			}
 	    });
+	});
+	
+	// Add a user to an existing document
+
+    app.post('/opendoc', function(req, res){
+    // check if the user's credentials are saved in a cookie //
+		if (req.cookies.user == undefined || req.cookies.pass == undefined){
+			res.render('login', { title: 'Hello - Please Login To Your Account' });
+		}	else{
+	// attempt automatic login //
+			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
+				if (o != null){
+				    req.session.user = o;
+					res.redirect('/home');
+				}	else{
+					res.render('login', { title: 'Hello - Please Login To Your Account' });
+				}
+			});
+		}
 	});
 
   app.post('/undo', function(req, res)
@@ -292,20 +308,6 @@ module.exports = function(app) {
           }
       });
     });
-	
-	/*app.get('/mydocuments', function(req, res) {
-		var email = req.query["e"];
-		var passH = req.query["p"];
-		AM.validateResetLink(email, passH, function(e){
-			if (e != 'ok'){
-				res.redirect('/');
-			} else{
-	// save the user's email in a session instead of sending to the client //
-				req.session.reset = { email:email, passHash:passH };
-				res.render('reset', { title : 'Reset Password' });
-			}
-		})
-	});*/
 	
 	app.get('*', function(req, res) { 
     console.log("What ?");

@@ -16,6 +16,9 @@ function HomeController()
 	
 // create a new doc
 	$('#account-form-btn4').click(function(){ $('.modal-newdoc').modal('show');});
+	
+// open a document
+	$('#account-form-btn5').click(function(){ $('.modal-opendoc').modal('show');});
 
 // handle account deletion //
 	$('.modal-confirm .submit').click(function(){ that.deleteAccount(); });
@@ -25,6 +28,27 @@ function HomeController()
 
 // handle new document submission //
 	$('.modal-newdoc .submit').click(function(){ that.newDoc(); });
+	
+// handle open document submission //
+	$('.modal-opendoc .submit').click(function(){ that.openDoc(); });
+		
+	this.openDoc = function()
+	{
+		$('.modal-opendoc').modal('hide');
+		//console.log('ok '+'  '+$('#name-doc').val());
+		var that = this;
+		$.ajax({
+			url: '/opendoc',
+			type: 'POST',
+			data: { id: $('#userId').val(), doc: $('#document-to-open').val() },
+			success: function(data){
+				
+			},
+			error: function(jqXHR){
+				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
+			}
+		});
+	}
 	
 	this.newDoc = function()
 	{
@@ -54,9 +78,6 @@ function HomeController()
 	{
 		$('.modal-mydocs').modal('hide');
 		var that = this;
-		console.log("test :");
-		console.log($('#document-list').val());
-		console.log($('#name-user').val());
 		
 		$.ajax({
 			url: '/mydocuments',
