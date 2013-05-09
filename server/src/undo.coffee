@@ -3,7 +3,7 @@ url = require 'url'
 qs = require 'querystring'
 
 shareJSModel = null
-UNDO_PARAM = 10
+UNDO_PARAM = 100
 
 matchDocName = (urlString) ->
   urlParts = url.parse urlString
@@ -19,6 +19,41 @@ index = (array, cond) ->
     if elem and cond(elem)
       return i
     i += 1
+
+packUndo = (ops) ->
+  #Create an operation with the last word
+  ops_to_undo = []
+  last_position = -1
+  last_version = -1
+  for j in [ops.length-1..0]
+    ops_to_undo.push ops[j]
+    console.log("OPS[j]")
+    console.log(ops[j])
+    if ops[j].op.length != 1
+      console.log("WARNING MORE THAN ONE OPERATION")
+      console.log(ops[j])
+      console.log(ops[j].op.length)
+    operation = ops[j].op[0]
+    new_position = operation.p
+    new_version = ops[j].v
+    if typeof operation.i == "undefined"
+      console.log("no i")
+      break
+    if operation.i == ' ' or operation.i == '\n'
+      console.log("i space")
+      break
+    if last_position != -1 and new_position != last_position-1
+      console.log("Last position " + last_position)
+      console.log("New position " + new_position)
+      break
+    if last_version != -1 and new_version != last_version-1
+      console.log("Last version " + last_version)
+      console.log("New version " + new_version)
+      break
+    last_position = new_position
+    last_version = new_version
+    console.log("Done")
+  return ops_to_undo
 
 #Take a list of ops and remove the undo / undone ops
 filterUndone = (ops, callback) ->
@@ -71,31 +106,35 @@ callUndo = (req, res) ->
           obj.string = "Already undone max number of operations"
           return
 
-        last_operation = ops[ops.length-1]
-        # Is it possible to have more than one op ?
-        last_op = last_operation.op[0]
-        last_version = last_operation.v
+        ops = packUndo(ops)
+        console.log("Pack undo")
+        console.log(ops)
+        for i in [ops.length-1..0]
+          last_operation = ops[i]
+          # Is it possible to have more than one op ?
+          last_op = last_operation.op[0]
+          last_version = last_operation.v
 
-        op_reversed = {}
-        op_reversed.p = last_op.p
-        if last_op.i
-            op_reversed.d = last_op.i
-        else
-            op_reversed.i =last_op.d
-
-        op_undo = {
-            v: version,
-            op: [op_reversed],
-            meta: {undo: last_version} #TODO Add client as source ?
-            }
-
-        shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
-          if err
-            obj.string = "UNDO: applyOp failed" + err
-            console.log(obj.string)
+          op_reversed = {}
+          op_reversed.p = last_op.p
+          if last_op.i
+              op_reversed.d = last_op.i
           else
-            console.log("UNDO: applyOp success " + newVersion)
-        )
+              op_reversed.i =last_op.d
+
+          op_undo = {
+              v: version,
+              op: [op_reversed],
+              meta: {undo: last_version} #TODO Add client as source ?
+              }
+
+          shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
+            if err
+              obj.string = "UNDO: applyOp failed" + err
+              console.log(obj.string)
+            else
+              console.log("UNDO: applyOp success " + newVersion)
+          )
     )
     res.writeHead 200, {'Content-Type': 'application/json'}
     res.end JSON.stringify(obj) + '\n'
