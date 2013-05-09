@@ -22,6 +22,7 @@ var doc_id = process.argv[6];
 var doc_version = 0;
 var doc_content = Buffer(0);
 var cookies;
+var shared_doc;
 
 // Log the current user on the server
 function login(username, password) {
@@ -46,6 +47,40 @@ function login(username, password) {
         }
     });
 }
+
+// Open the wanted document with share js
+function openDocument(buf) {
+    console.log("Connecting with nodejs");
+    sharejs.open(doc_name, 'text', {
+        'origin': 'http://'+domain+'/channel',
+        'authentication': cookies['connect.sid']
+        }, function(error, d){
+            shared_doc = d;
+            pushTextToBuffer(buf, shared_doc.getText());
+        }
+    );
+};
+
+function pushTextToBuffer(buf, text) {
+    var restoreCursor = preserveCursor(buf);
+
+    // clear buffer before inserting
+    buf.getLength(function (len) {
+        if (len)
+            buf.remove(0, len, insertText);
+        else
+            insertText();
+    });
+
+    function insertText(err) {
+        if (err) throw err;
+        buf.insert(0, text.toString(), function (err) {
+            if (err) throw err;
+            restoreCursor();
+            buf.insertDone();
+        });
+    }
+};
 
 // Preserve the cursor position.
 // If transaction is provided, execute it and then restore the cursor.
@@ -495,7 +530,8 @@ function launchServer(){
     server.on("clientAuthed", function (vim) {
         // Open this buffer for syncing.
         vim.key("C-o", function (buf) {
-            doc.getDocumentFromServer(buf);
+            //doc.getDocumentFromServer(buf);
+            openDocument(buf);
             doc.connectBuffer(buf);
         });
 
