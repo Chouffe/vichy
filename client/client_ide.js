@@ -18,8 +18,6 @@ var hostname = process.argv[2];
 var port = process.argv[3];
 var token = login(process.argv[4], process.argv[5]);
 var doc_name = process.argv[6];
-var doc_id = process.argv[6];
-var doc_version = 0;
 var doc_content = Buffer(0);
 var cookies;
 var shared_doc;
@@ -68,22 +66,50 @@ function openDocument(buf) {
             'authentication': cookies['connect.sid']
             }, function(error, d){
                 shared_doc = d;
+                if (shared_doc.getText() == ""){
+                    console.log("Add new line !");
+                    //shared_doc.insert(0, "\n");
+                }
                 pushTextToBuffer(buf, shared_doc.getText());
 
                 shared_doc.on('insert', function(pos, text){
+                    console.log("Update: insert at "+pos+" "+text.length+" "+text);
                     var restoreCursor = preserveCursor(buffer);
+                    console.log("First part: "+current_content.slice(0, pos));
+                    console.log("Second part: "+Buffer(text));
+                    console.log("Third part: "+current_content.slice(pos));
+                    current_content = Buffer.concat([
+                        current_content.slice(0, pos),
+                        Buffer(text),
+                        current_content.slice(pos)
+                    ]);//, current_content.length + text.length);
+
+                    pushTextToBuffer(buffer, shared_doc.getText());
+                    restoreCursor();
+                    /*
                     buffer.insert(pos, text, function(){
                         restoreCursor();
                         buffer.insertDone();
                     });
+                    */
                 });
 
                 shared_doc.on('delete', function(pos, text){
+                    console.log("Update: delete at "+pos+" "+text.length+" "+text);
                     var restoreCursor = preserveCursor(buffer);
+                    if (text.length) current_content = Buffer.concat([
+                        current_content.slice(0, pos),
+                        current_content.slice(pos + text.length)
+                    ], current_content.length - text.length);
+                    /*
                     buffer.remove(pos, text.length, function(){
                         restoreCursor();
                         buffer.insertDone();
                     });
+                    */
+
+                    pushTextToBuffer(buffer, shared_doc.getText());
+                    restoreCursor();
                 });
             }
         );
@@ -91,11 +117,11 @@ function openDocument(buf) {
 };
 
 function pushTextToBuffer(buf, text) {
-    if (text == current_content.slice(0, current_content.length-1)){
+    if (text == current_content.toString().slice(0)){
         console.log("Buffer already up to date, not pushing");
     }
     else{
-        current_content = Buffer(text);
+        current_content = Buffer(text+"\n");
 
         var restoreCursor = preserveCursor(buf);
 
@@ -118,41 +144,12 @@ function pushTextToBuffer(buf, text) {
     }
 };
 
-function remove(offset, length, from) {
-    if (offset + length >= current_content.length) {
-        length = current_content.length - offset;
-    }
-    var removed = current_content.slice(offset, offset + length).toString();
-    var hasNewline = (current_content[offset+length] == 10) &&
-        current_content[offset+length+1] == 10;
-    console.log(offset +
-        (hasNewline ? "~" : "-") + length + " " + removed);
-        //"-" + length + " " + removed);
-        //"-" + length);
-
-    if (length) current_content = Buffer.concat([
-        current_content.slice(0, offset),
-        current_content.slice(offset + length)
-    ], current_content.length - length);
-
-    /*
-    this.buffers.forEach(function (buf) {
-        // todo: make this work
-                //if (buf != from) preserveCursor(buf, function () {
-            //buf.remove(offset, length || 1);
-        //});
-        if (buf != from) buf.remove(offset, length || 1);
-    });
-    */
-}
-
 // Preserve the cursor position.
 // If transaction is provided, execute it and then restore the cursor.
 // Otherwise return the restoreCursor function to be called later.
 function preserveCursor(buf, transaction) {
     var offset;
     function restoreCursor() {
-        console.log('restore', offset);
         if (offset != null) buf.setDot(offset);
     }
     buf.getCursor(function (lnum, col, off) {
@@ -177,7 +174,6 @@ function combo(offset, removeLen, insertText) {
         insertBytes = new Buffer(insertText.concat("\n")),
         insertLen = insertText.length;
     insertBytes[insertLen+1] = "\0";
-    console.log("Remove: "+removeText+"\nInsert: "+insertText);
 
     // check for simple append
     // appending on a blank line always inserts a new line
@@ -280,6 +276,7 @@ function bufferWantsToRemove(buf, offset, length) {
 };
 
 function bufferWantsToInsert(buf, offset, text) {
+    console.log("Want to add offset "+offset+" text "+text);
     // detect when an insert happens immediately after a remove.
     if (removeInsert) {
         if (removeInsertOffset == offset) {
@@ -309,17 +306,20 @@ function insert(offset, text, from) {
         bytes = new Buffer(text);
     }
     var length = bytes.length;
+    /*
     if (text == "") {
         text = "\n";
     } else {
+    */
+    if (text != "") {
         current_content = Buffer.concat([
             current_content.slice(0, offset),
             bytes,
             current_content.slice(offset)
         ], current_content.length + length);
+        shared_doc.insert(offset, text, function() {});
+        console.log("ShareJS insert: offset: "+offset+" text: "+text);
     }
-    shared_doc.insert(offset, text, function() {});
-    console.log("ShareJS insert: offset: "+offset+" text: "+text);
 };
 
 function remove(offset, length, from) {
@@ -406,6 +406,7 @@ function launchServer(){
 
     var server = new nb.VimServer({
         debug: process.argv.indexOf("-v") != -1
+        //,port:8765
     });
 
     server.on("clientAuthed", function (vim) {
@@ -439,7 +440,6 @@ function launchServer(){
     
         vim.on("disconnected", function () {
             console.log("Vim client disconnected");
-            if (doc) doc.disconnectBuffer(doc.buffer);
         });
 
         vim.on("remove", bufferWantsToRemove);
