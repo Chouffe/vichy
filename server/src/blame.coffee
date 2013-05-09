@@ -42,11 +42,14 @@ delet = (lines, op, meta) ->
             if dlines[0].length > 0
                 line.end = line.end - dlines[0].length
             if dlines.length-1 > 0
-                line.end--
                 removed = lines.splice(i+1, dlines.length-1)
                 last_line = removed[removed.length-1]
-                line.end += last_line.end - last_line.start - dlines[dlines.length-1].length
-                line.ended = last_line.ended
+                if last_line
+                    line.end--
+                    line.end += last_line.end - last_line.start - dlines[dlines.length-1].length
+                    line.ended = last_line.ended
+                else
+                    line.ended = false
             line.author = name
             line.date = date
             break
