@@ -79,10 +79,11 @@ filterUndone = (ops, callback) ->
     return results
 
 callUndo = (req, res) ->
+    #TODO: secure...
+    user = req.cookies.user
     console.log("Entering CallUndo")
     obj =
       string: ""
-
 
     # TODO: call getOps (version given by req), then submit the inverse operation
     queryData = req.body
@@ -125,7 +126,7 @@ callUndo = (req, res) ->
           op_undo = {
               v: version,
               op: [op_reversed],
-              meta: {undo: last_version} #TODO Add client as source ?
+              meta: {undo: last_version, name: user}
               }
 
           shareJSModel.applyOp(doc_name, op_undo, (err, newVersion) ->
