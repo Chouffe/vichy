@@ -80,7 +80,7 @@ filterUndone = (ops, callback) ->
 
 callUndo = (req, res) ->
     #TODO: secure...
-    user = req.cookies.user
+    user = req.session.user
     console.log("Entering CallUndo")
     obj =
       string: ""

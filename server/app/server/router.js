@@ -284,8 +284,12 @@ module.exports = function(app) {
 
   app.post('/undo', function(req, res)
     {
-      console.log("UNDO");
-      undo.parseUndo(req, res);
+      if (req.session.user == null){
+          res.send({'error': 'not logged in'}, 400);
+      } else{
+          console.log("UNDO");
+          undo.parseUndo(req, res);
+      }
     });
   
   app.get('/blame/:docname.json', function(req, res){
