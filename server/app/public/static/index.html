@@ -1,39 +1,41 @@
+<!DOCTYPE HTML>
 <html>
-    <head>
-        <title>ShareJS Tutorial</title>
-        <!-- NEW -->
-        <link href="style.css" rel="stylesheet" type="text/css">
-        <script src="bcsocket.js"></script>             <!-- add transport -->
-        <script src="webclient/share.js"></script>      <!-- ShareJS -->
-        <script src="webclient/textarea.js"></script>   <!-- helper to attach textarea to ShareJS server -->
-        <script src="work/undo.js"></script> <!-- provide undo function -->
-        <script src="work/blame.js"></script> <!-- provide blame function -->
-        <!-- /NEW -->
-    </head>
-    <body>
-        <h1>ShareJS Tutorial</h1>
+	<head>
+		<link href="ace_in/style.css" rel="stylesheet" type="text/css">
+		<title>Hello World</title>
+	</head>
+
+	<body>
+		<div id="header">
+			<div id="htext">
+				Editing <b>hello</b></input>
         <button onclick="undo()">Undo</button>
         <button onclick="blame()">Blame</button>
-        <br>
-        <div id='Blame' class='blame'>
-        </div>
-        <textarea id='sharetext' class='text' rows='20' cols='50'></textarea>
-        <!-- NEW -->
-        <script>
-            // get the textarea element 
-            var elem = document.getElementById("sharetext");
-            // connect to the server
-            var connection = sharejs.open('test2', 'text', function(error, doc)
-            {
-                // this function is called once the connection is opened
-                if (error) {
-                    console.log("ERROR:", error);
-                } else {
-                    // attach the ShareJS document to the textarea
-                    doc.attach_textarea(elem);
-                }
-            });
-        </script>
-        <!-- /NEW -->
-    </body>
-</html>
+			</div>
+		</div>
+    <div id='Blame' class='blame'></div>
+
+		<div id="editor"></div>
+
+		<script src="lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/channel/bcsocket.js"></script>
+		<script src="webclient/share.uncompressed.js"></script>
+		<script src="webclient/ace.js"></script>
+    <script src="work/undo.js"></script> <!-- provide undo function -->
+    <script src="work/blame.js"></script> <!-- provide blame function -->
+
+		<script>
+var editor = ace.edit("editor");
+
+sharejs.open('test2', 'text', function(error, doc) {
+  if (error) {
+    alert("Error")
+  } 
+  else {
+    doc.attach_ace(editor);
+  }
+});
+		</script>
+	</body>
+</html>	
+
