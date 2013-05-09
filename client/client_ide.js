@@ -2,6 +2,8 @@ var util = require("util"),
     EventEmitter = require("events").EventEmitter,
     nb = require("vim-netbeans"),
     cookie = require("cookie"),
+    sharejs = require("share").client,
+    http = require("http"),
     $ = require("jquery");
 
 // Check arguments
@@ -15,6 +17,7 @@ var domain = process.argv[2]+":"+process.argv[3];
 var hostname = process.argv[2];
 var port = process.argv[3];
 var token = login(process.argv[4], process.argv[5]);
+var doc_name = process.argv[6];
 var doc_id = process.argv[6];
 var doc_version = 0;
 var doc_content = Buffer(0);
@@ -22,16 +25,22 @@ var cookies;
 
 // Log the current user on the server
 function login(username, password) {
-    console.log("Login...");
-    $.ajax({
-        url: "http://"+domain+"/login/"+username+"/"+password+".json",
+    var path = "/login/"+username+"/"+password+".json";
+    var login = $.ajax({
+        url: "http://"+domain+path,
         success: function(data, textStatus, xhr) {
             if (typeof(data["error"]) != "undefined"){
                 console.log("Login error: "+data["error"]);
             }
             else{
-                cookies = cookie.parse(xhr.getAllResponseHeaders('set-cookie'));
-                console.log("Cookie: "+cookies);
+                http.get({
+                    hostname: hostname,
+                    port: port,
+                    path: path,
+                    agent: false
+                    }, function(res) {
+                    cookies = cookie.parse(res.headers['set-cookie'][0]);
+                    });
                 launchServer();
             }
         }
@@ -275,6 +284,11 @@ Doc.prototype = {
     // Contact the server to get the current version of the document
     getDocumentFromServer: function(buf) {
         console.log("Fetching document from server...");
+        sharejs.open(doc_name, 'text', {
+            'origin': 'http://'+domain+'/channel',
+            'authentication': cookies['connect.sid']
+            }, function(){});
+        /*
         $.ajax({
             url: "http://"+domain+"/document/"+doc_id+"/"+token+".json",
             success: function(data) {
@@ -290,6 +304,7 @@ Doc.prototype = {
                 }
             }
         });
+        */
     },
     
     pushTextToBuffer: function(buf, text) {
