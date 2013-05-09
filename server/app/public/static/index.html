@@ -10,10 +10,9 @@
 			<div id="htext">
 				Editing <b>hello</b></input>
         <button onclick="undo()">Undo</button>
-        <button onclick="blame()">Blame</button>
+        <button onclick="blame(editor)">Blame</button>
 			</div>
 		</div>
-    <div id='Blame' class='blame'></div>
 
 		<div id="editor"></div>
 
@@ -22,10 +21,10 @@
 		<script src="webclient/share.uncompressed.js"></script>
 		<script src="webclient/ace.js"></script>
     <script src="work/undo.js"></script> <!-- provide undo function -->
-    <script src="work/blame.js"></script> <!-- provide blame function -->
-
+    <script src="work/blame.js"></script>
 		<script>
 var editor = ace.edit("editor");
+editor.setFontSize(12);
 
 sharejs.open('test2', 'text', function(error, doc) {
   if (error) {
