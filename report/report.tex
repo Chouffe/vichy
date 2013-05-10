@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
-%\usepackage{minted}
+\usepackage{minted}
 
 %\usepackage{graphicx}
 %
@@ -73,7 +73,7 @@ However, ShareJS does not provide directly all the features that we need.
 We had to add the possibility to undo an operation and to authenticate an user in order to add
 history and management of users rights.\\
 \\
-ShareJS is a powerfull library, but is still a young project, and not yet stable and well-documented.
+ShareJS is a powerful library, but is still a young project, and not yet stable and well-documented.
 That brought us some problems.
 Bertrand even had to correct a small bug in the source code of ShareJS concerning its connection with MongoDB.
 
@@ -104,24 +104,24 @@ breaking it. Furthermore MongoDB provides powerful aggregation features through
 its aggregation framework and map-reduce implementation that we used to compute
 statistics on the database (see listing~\ref{query_example} for an example).
 
-%\begin{listing}
-%    \begin{minted}[frame=single,
-%            framesep=3mm,
-%            xleftmargin=21pt,
-%        tabsize=4]{js}
-%        db.ops.aggregate(
-%            {$match : {
-%                "_id.doc": docName }
-%            },
-%            {$group :{
-%                _id: "$opData.meta.name",
-%                ops: {$sum : 1}}
-%            }
-%        );
-%    \end{minted}
-%    \caption{Query computing total number of users operations on a document} 
-%    \label{query_example}
-%\end{listing}
+\begin{listing}
+    \begin{minted}[frame=single,
+            framesep=3mm,
+            xleftmargin=21pt,
+        tabsize=4]{js}
+        db.ops.aggregate(
+            {$match : {
+                "_id.doc": docName }
+            },
+            {$group :{
+                _id: "$opData.meta.name",
+                ops: {$sum : 1}}
+            }
+        );
+    \end{minted}
+    \caption{Query computing total number of users operations on a document} 
+    \label{query_example}
+\end{listing}
 \subsection{Database structure}
 
 Documents and operations are stored in two different collections. The docs
@@ -129,29 +129,29 @@ collection that can be described by the structure on
 Listing~\ref{docs_collection} summarizes information about documents such
 as the current version, a snapshot of this version and some metadata.
 
-%\begin{listing}
-%    \begin{minted}[frame=single,
-%            framesep=3mm,
-%            xleftmargin=21pt,
-%        tabsize=4]{js}
-%        {
-%            "_id": string,
-%            "data": {
-%                "v": number,
-%                "meta": {
-%                    "creator": string,
-%                    "mtime": number,
-%                    "ctime": number,
-%                    "name": string
-%                },
-%                "snapshot": string,
-%                "type": string
-%            }
-%        }
-%    \end{minted}
-%    \caption{Documents collection schema} 
-%    \label{docs_collection}
-%\end{listing}
+\begin{listing}
+    \begin{minted}[frame=single,
+            framesep=3mm,
+            xleftmargin=21pt,
+        tabsize=4]{js}
+        {
+            "_id": string,
+            "data": {
+                "v": number,
+                "meta": {
+                    "creator": string,
+                    "mtime": number,
+                    "ctime": number,
+                    "name": string
+                },
+                "snapshot": string,
+                "type": string
+            }
+        }
+    \end{minted}
+    \caption{Documents collection schema} 
+    \label{docs_collection}
+\end{listing}
 
 The ops collections that can be described by the structure on
 Listing~\ref{ops_collection} contains all the operations such as they were
@@ -159,30 +159,30 @@ transformed by ShareJS algorithms. Each operations consists of one or several
 addition or deletion paired with their position. We also added a name field in
 the meta information to be able to identify the author of a certain
 modification.
-%
-%\begin{listing}
-%    \begin{minted}[frame=single,
-%            framesep=3mm,
-%            xleftmargin=21pt,
-%        tabsize=4]{js}
-%        {
-%            "opData": {
-%                "op": [objects],
-%                "meta": {
-%                    "source": string,
-%                    "name": string,
-%                    "ts": number
-%                }
-%            },
-%            "_id": {
-%                "doc": string,
-%                "v": number
-%            }
-%        }
-%    \end{minted}
-%    \caption{Operations collection schema} 
-%    \label{ops_collection}
-%\end{listing}
+
+\begin{listing}
+    \begin{minted}[frame=single,
+            framesep=3mm,
+            xleftmargin=21pt,
+        tabsize=4]{js}
+        {
+            "opData": {
+                "op": [objects],
+                "meta": {
+                    "source": string,
+                    "name": string,
+                    "ts": number
+                }
+            },
+            "_id": {
+                "doc": string,
+                "v": number
+            }
+        }
+    \end{minted}
+    \caption{Operations collection schema} 
+    \label{ops_collection}
+\end{listing}
 
 \subsection{Management of the documents}
 
@@ -194,7 +194,7 @@ users existing on the website. The user can also open his documents inside the b
 
 \section{Client side}\label{sec:Others}
 
-The client is written in javascript, powered using Node.js.\cite{nodejs}
+The client is written in JavaScript, powered using Node.js.\cite{nodejs}
 
 \subsection{Use of the NetBeans Protocol}
 
