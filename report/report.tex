@@ -1,6 +1,7 @@
 \documentclass{llncs}
 
 \usepackage[utf8]{inputenc}
+\usepackage{hyperref}
 
 %\usepackage{graphicx}
 %
@@ -29,7 +30,11 @@ This paper presents in the first part the method which has been used on the clie
 
 \section{Extraction of Vim modifications}\label{sec:Others}
 
-Other sections are here. 
+\subsection{Use of the NetBeans Protocol}
+
+The NetBeans protocol of Vim is a text based communication protocol over a classical TCP socket. It permits any environment providing a socket interface to control Vim using this protocol.\cite{netbeans} Using this protocol, we can then create a client that will be a link between our server who is merging the different version of the document, and the Vim instance. The client will be notified every time the user modifies the document, and will update the buffer in Vim when it receives modifications from the server. It would have been possible to have vim directly connected to the distant server, but then the server would have had the full power over vim clients, which is not good for obvious security reasons.\\
+We used an implementation of the NetBeans Protocol for Node.js called \textit{node-vim-netbeans}.
+
 
 \section{Database structure and concurrency problems}\label{sec:Others}
 
@@ -43,6 +48,10 @@ Authors would like to thank YYYYY.
 
 \begin{thebibliography}{1}
 
+\bibitem{netbeans}
+Vim documentation defining this protocol: \url{http://vimdoc.sourceforge.net/htmldoc/netbeans.html}
+\bibitem{node-vim-netbeans}
+node-vim-netbeans on github: \url{https://github.com/clehner/node-vim-netbeans}
 \bibitem{Einstein}
 A. Einstein, On the movement of small particles suspended in stationary liquids required by the molecular-kinetic theory of heat, Annalen der Physik 17, pp. 549-560, 1905.
 
