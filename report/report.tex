@@ -2,6 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
+\usepackage{minted}
 
 %\usepackage{graphicx}
 %
@@ -113,6 +114,82 @@ which are simpler to write.\\
 We implemented a \textit{blame} function opening a new buffer next to the
 current one, and showing who was the last person to modify each line.
 
+\subsection{Database}
+
+We chose to use the NoSQL database MongoDB for several reasons. As a starting
+point we were curious to dicover the trending world of NoSQL databases. So we
+first did some research to make sure that NoSQL was suitable for our use that we
+defined as the abilities to:
+
+\begin{itemize}
+        \item Store a current snapshot of the document as well as some metadata.
+        \item Keep a record of all operations performed on a document so that
+            they can be easily processed to extract statistics and allow us to
+            add an undo operation on top of ShareJS.
+        \item Store informations about users and rights on document to allow
+            secure editing through secure authentication and fine user rights
+            configuration.
+\end{itemize}
+
+MongoDB satisfies all these needs. It is able to represent documents, operations,
+and user informations as JSON structured document. They are then organized in
+collections similar to the RDBMS concept of tables but that do not enforce a schema.
+This property actually happened to be very useful later on the project since it
+allowed us to add some additional fields in the existing ShareJS database without
+breaking it. Furthermore MongoDB provides powerful aggregation features through
+its aggregation framework and map-reduce implementation that we used to compute
+statistics on the database.
+
+\subsection{Database structure}
+
+Documents collections:
+%\begin{listing}
+%    \begin{minted}[frame=single,
+%            framesep=3mm,
+%            xleftmargin=21pt,
+%        tabsize=4]{js}
+%        {
+%            "_id": string,
+%            "data": {
+%                "v": number,
+%                "meta": {
+%                    "creator": string,
+%                    "mtime": number,
+%                    "ctime": number,
+%                    "name": string
+%                },
+%                "snapshot": string,
+%                "type": string
+%            }
+%        }
+%    \end{minted}
+%    \caption{Documents collection schema} 
+%    \label{docs_collection}
+%\end{listing}
+%
+%\begin{listing}
+%    \begin{minted}[frame=single,
+%            framesep=3mm,
+%            xleftmargin=21pt,
+%        tabsize=4]{js}
+%        {
+%            "opData": {
+%                "op": [objects],
+%                "meta": {
+%                    "source": string,
+%                    "name": string,
+%                    "ts": number
+%                }
+%            },
+%            "_id": {
+%                "doc": string,
+%                "v": number
+%            }
+%        }
+%    \end{minted}
+%    \caption{Operations collection schema} 
+%    \label{ops_collection}
+%\end{listing}
 \section{Conclusion}\label{sec:Conclusion}
 
 Conclusions are here.
