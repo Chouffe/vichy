@@ -267,13 +267,13 @@ module.exports = function(app) {
 
     app.get('/opendoc', function(req, res){
     // check if the user's credentials are saved in a cookie //
+    	console.log('ok ok ok');
 		if (req.cookies.user == undefined || req.cookies.pass == undefined){
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{
-      	console.log(req)
-      	console.log("Opendoc document" + req.param.doc);
-      	res.render('document', {doc_name:req.param('doc')});
-			//res.render('print', { title : 'Account List', accts : accounts });
+			console.log(req)
+			console.log("Opendoc document" + req.param.doc);
+       		res.render('document', {doc_name:req.param('doc')});
 		}
 	});
 

@@ -35,20 +35,22 @@ function HomeController()
 	this.openDoc = function()
 	{
 		$('.modal-opendoc').modal('hide');
-		//console.log('ok '+'  '+$('#name-doc').val());
 		var that = this;
-		$.get({
+		console.log('testttetee');
+		/*$.get({
 			url: '/opendoc',
 			type: 'GET',
 			//data:  "id="+$('#userId').val()+"doc="+$('#document-to-open').val(),
-      		data:"doc=3",
+      		//data: { id: $('#userId').val(), doc: $('#name-doc').val() },
+      		data:"doc=3", 
 			success: function(data){
-        		window.location.href='/opendoc'
-			},
+				console.log('ok');*/
+        		window.location.replace('/opendoc');
+			/*},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
 			}
-		});
+		});*/
 	}
 	
 	this.newDoc = function()
