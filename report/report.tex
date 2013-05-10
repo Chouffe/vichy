@@ -64,7 +64,7 @@ the Operational Transform algorithms. Given two concurrent operations, these kin
 of algorithms are able to decide which must be applied first and how the second
 operation must be transformed and applied in order to achieve a consistent result.
 Developing a complete Operational Transform system for this project seemed unrealistic.
-Instead we decided to use an open-source library called ShareJS. 
+Instead we decided to use an open-source library called ShareJS.\cite{sharejs}
 ShareJS provides a way to embed a collaborative editor in a web page.
 The library is made of two parts: one on the client-side in JavaScript, 
 and one on the server-side which comes as a module for the JavaScript server-side framework
@@ -74,12 +74,12 @@ We had to add the possibility to undo an operation and to authenticate an user i
 history and management of users rights.
 
 ShareJS is a young project, not yet stable and well-documented.
-Bertrand corrected a small bug in the connection of ShareJS with MongoDB
+During this project Bertrand even corrected a small bug in the source code of ShareJS concerning its connection with MongoDB.
 
 \subsection{Database}
 ShareJS can be used with many databases as back-end. 
 The available databases are: Redis, CouchDB, MongoDB, PostgreSQL and MySQL.
-We chose to use the NoSQL database MongoDB for several reasons. As a starting
+We chose to use the NoSQL database MongoDB\cite{mongo} for several reasons. As a starting
 point we were curious to discover the trending world of NoSQL databases. So we
 first did some research to make sure that NoSQL was suitable for our use that we
 defined as the abilities to:
@@ -172,9 +172,9 @@ Documents collections:
 %    \label{ops_collection}
 %\end{listing}
 
-\section{Implementation of the undo functionality}\label{sec:Others}
+\section{Client side}\label{sec:Others}
 
-\section{Extraction of Vim modifications}\label{sec:Others}
+The client is written in javascript, powered using Node.js.\cite{nodejs}
 
 \subsection{Use of the NetBeans Protocol}
 
@@ -209,6 +209,12 @@ we could have improved the visualization of the statistics to show them in a mor
 
 \begin{thebibliography}{1}
 
+\bibitem{nodejs}
+Node.js website: \url{http://nodejs.org}
+\bibitem{sharejs}
+ShareJS website: \url{http://sharejs.org}
+\bibitem{mongo}
+MongoDB website: \url{http://www.mongodb.org}
 \bibitem{netbeans}
 Vim documentation defining this protocol: \url{http://vimdoc.sourceforge.net/htmldoc/netbeans.html}
 \bibitem{node-vim-netbeans}
