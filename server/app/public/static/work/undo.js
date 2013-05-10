@@ -1,7 +1,7 @@
 function undo()
 {
 
-    var connection = sharejs.open('test2', 'text', function(error, doc)
+    var connection = sharejs.open(docToOpen, 'text', function(error, doc)
     {
         // this function is called once the connection is opened
         if (error) {
@@ -9,7 +9,7 @@ function undo()
         } else {
             // attach the ShareJS document to the textarea
             var xhr = new XMLHttpRequest();
-            var doc_name = encodeURIComponent("test2");
+            var doc_name = encodeURIComponent(docToOpen);
             var version = doc.version;
             xhr.open("POST", "http://localhost:8088/undo", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

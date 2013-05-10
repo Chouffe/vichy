@@ -265,16 +265,13 @@ module.exports = function(app) {
 	
 	// Add a user to an existing document
 
-    app.get('/opendoc', function(req, res){
+    app.get('/opendoc/:document', function(req, res){
     // check if the user's credentials are saved in a cookie //
-    	console.log('ok ok ok');
 		if (req.cookies.user == undefined || req.cookies.pass == undefined){
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{
-			console.log(req);
-			resrender('index');
-			//console.log("Opendoc document" + req.param.doc);
-       		//res.render('document', {doc_name:req.param('doc')});
+			console.log(req.params.document);
+			res.render('index', { open_doc: req.params.document});//, { document_open: req.params.document});
 		}
 	});
 

@@ -37,20 +37,21 @@ function HomeController()
 		$('.modal-opendoc').modal('hide');
 		var that = this;
 		//console.log('testttetee');
-		$.ajax({
+		/*$.ajax({
 			url: '/opendoc',
 			type: 'GET',
 			//data:  "id="+$('#userId').val()+"doc="+$('#document-to-open').val(),
       		//data: { id: $('#userId').val(), doc: $('#name-doc').val() },
-      		data:"doc=3", 
-			success: function(data){
-				console.log('ok');
-        		//window.location.replace('/opendoc');
-			},
+      		data:{}, 
+			success: function(data){*/
+				//console.log('ok');
+				var link = '/opendoc/'+$('#document-to-open').val();
+        		window.location.replace(link);
+			/*},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
 			}
-		});
+		});*/
 	}
 	
 	this.newDoc = function()
