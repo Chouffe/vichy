@@ -37,11 +37,13 @@ function HomeController()
 		$('.modal-opendoc').modal('hide');
 		//console.log('ok '+'  '+$('#name-doc').val());
 		var that = this;
-		$.ajax({
+		$.get({
 			url: '/opendoc',
-			type: 'POST',
-			data: { id: $('#userId').val(), doc: $('#document-to-open').val() },
+			type: 'GET',
+			//data:  "id="+$('#userId').val()+"doc="+$('#document-to-open').val(),
+      data:"doc=3",
 			success: function(data){
+        window.location.href='/opendoc'
 				
 			},
 			error: function(jqXHR){
