@@ -12,7 +12,7 @@
 \title{Vichy: the collaborative editor}
 \subtitle{Get ready to love it, resistance is futile\ldots}
 
-\author{Romain Pomier,\\Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet}
+\author{Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet,\\Romain Pomier}
 
 \institute{School of Computer Science and Communication, Royal Institute of Technology KTH, Stockholm}
 \maketitle
@@ -58,23 +58,24 @@ least made differently.
 \subsection{Synchronization}
 
 Allowing users to collaboratively edit documents is not an easy task.
-What happens if two users modify the document at the same time ?
-They could even modify the same word ! A class of algorithms was developed to handle these difficulties:
+What happens if two users modify the document at the same time?
+They could even modify the same word! A class of algorithms was developed to handle these difficulties:
 the Operational Transform algorithms. Given two concurrent operations, these kind
 of algorithms are able to decide which must be applied first and how the second
-operation must be transformed and applied in order to achieve a consistent result.
+operation must be transformed and applied in order to achieve a consistent result.\\
 Developing a complete Operational Transform system for this project seemed unrealistic.
 Instead we decided to use an open-source library called ShareJS.\cite{sharejs}
-ShareJS provides a way to embed a collaborative editor in a web page.
+ShareJS provides a way to embed a collaborative editor in a web page.\\
 The library is made of two parts: one on the client-side in JavaScript, 
 and one on the server-side which comes as a module for the JavaScript server-side framework
-Node.js.
-ShareJS does not provide directly all the features that we need. 
+Node.js.\cite{nodejs} We then wrote our server in JavaScript, using Node.js\\
+However, ShareJS does not provide directly all the features that we need. 
 We had to add the possibility to undo an operation and to authenticate an user in order to add
-history and management of users rights.
-
-ShareJS is a young project, not yet stable and well-documented.
-During this project Bertrand even corrected a small bug in the source code of ShareJS concerning its connection with MongoDB.
+history and management of users rights.\\
+\\
+ShareJS is a powerfull library, but is still a young project, and not yet stable and well-documented.
+That brought us some problems.
+Bertrand even had to correct a small bug in the source code of ShareJS concerning its connection with MongoDB.
 
 \subsection{Database}
 ShareJS can be used with many databases as back-end. 
@@ -223,21 +224,24 @@ current one, and showing who was the last person to modify each line.
 
 In the end, the collaborative editing in Vim works with our implementation.
 It has been quite difficult to choose the right method to implement our collaborative plugin
-because Vim gives few tools to access the modifications a user does. With more time,
-we could have improved the visualization of the statistics to show them in a more friendly way.
+because Vim gives few tools to access the modifications a user does, but we managed to make it work.
+With more time, we could have improved the visualization of the statistics to show them in a more friendly way.
+The source code of our project is available on Github.\cite{github}
 
 \begin{thebibliography}{1}
 
-\bibitem{nodejs}
-Node.js website: \url{http://nodejs.org}
 \bibitem{sharejs}
 ShareJS website: \url{http://sharejs.org}
+\bibitem{nodejs}
+Node.js website: \url{http://nodejs.org}
 \bibitem{mongo}
 MongoDB website: \url{http://www.mongodb.org}
 \bibitem{netbeans}
 Vim documentation defining this protocol: \url{http://vimdoc.sourceforge.net/htmldoc/netbeans.html}
 \bibitem{node-vim-netbeans}
 node-vim-netbeans on github: \url{https://github.com/clehner/node-vim-netbeans}
+\bibitem{github}
+\url{https://github.com/Chouffe/vichy}
 
 \end{thebibliography}
 
