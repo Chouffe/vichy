@@ -41,10 +41,9 @@ function HomeController()
 			url: '/opendoc',
 			type: 'GET',
 			//data:  "id="+$('#userId').val()+"doc="+$('#document-to-open').val(),
-      data:"doc=3",
+      		data:"doc=3",
 			success: function(data){
-        window.location.href='/opendoc'
-				
+        		window.location.href='/opendoc'
 			},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
