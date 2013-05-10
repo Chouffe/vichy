@@ -11,7 +11,7 @@
 \title{Vichy: the collaborative editor}
 \subtitle{Get ready to love it, resistance is futile\ldots}
 
-\author{Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet, Romain Pomier}
+\author{Romain Pomier,\\Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet}
 
 \institute{School of Computer Science and Communication, Royal Institute of Technology KTH, Stockholm}
 \maketitle
@@ -49,7 +49,7 @@ In the second part, we explain the database structure and how we managed to
 solve the problem of concurrency with ShareJS.
 Some statistics are extracted from the database to give every user some
 information about the coding process.
-Finally, we explain in the coclusion how the solution can be improved or at
+Finally, we explain in the conclusion how the solution can be improved or at
 least made differently.
 
 \section{Collaborative editing}\label{sec:Collabo}
@@ -107,7 +107,11 @@ We used an implementation of the NetBeans Protocol for Node.js called
 
 \subsection{Vim plugin}
 
-To show in Vim some additional informations about the shared document, 
+To show in Vim some additional informations about the shared document, we
+created a plugin written in \textit{Vim script} and importing python function
+which are simpler to write.\\
+We implemented a \textit{blame} function opening a new buffer next to the
+current one, and showing who was the last person to modify each line.
 
 \section{Conclusion}\label{sec:Conclusion}
 
