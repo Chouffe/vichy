@@ -36,21 +36,21 @@ function HomeController()
 	{
 		$('.modal-opendoc').modal('hide');
 		var that = this;
-		console.log('testttetee');
-		/*$.get({
+		//console.log('testttetee');
+		$.ajax({
 			url: '/opendoc',
 			type: 'GET',
 			//data:  "id="+$('#userId').val()+"doc="+$('#document-to-open').val(),
       		//data: { id: $('#userId').val(), doc: $('#name-doc').val() },
       		data:"doc=3", 
 			success: function(data){
-				console.log('ok');*/
-        		window.location.replace('/opendoc');
-			/*},
+				console.log('ok');
+        		//window.location.replace('/opendoc');
+			},
 			error: function(jqXHR){
 				console.log(jqXHR.responseText+' :: '+jqXHR.statusText);
 			}
-		});*/
+		});
 	}
 	
 	this.newDoc = function()

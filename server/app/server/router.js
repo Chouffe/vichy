@@ -271,9 +271,10 @@ module.exports = function(app) {
 		if (req.cookies.user == undefined || req.cookies.pass == undefined){
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{
-			console.log(req)
-			console.log("Opendoc document" + req.param.doc);
-       		res.render('document', {doc_name:req.param('doc')});
+			console.log(req);
+			resrender('index');
+			//console.log("Opendoc document" + req.param.doc);
+       		//res.render('document', {doc_name:req.param('doc')});
 		}
 	});
 
