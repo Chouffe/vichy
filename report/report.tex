@@ -57,6 +57,8 @@ least made differently.
 
 \section{Server-side}\label{sec:Server-side}
 
+\subsection{Synchronization}
+
 Allowing users to collaboratively edit documents is not an easy task.
 What happens if two users modify the document at the same time ?
 They could even modify the same word ! A class of algorithms was developed to handle these difficulties:
@@ -121,9 +123,13 @@ statistics on the database (see listing~\ref{query_example} for an example).
 %    \caption{Query computing total number of users operations on a document} 
 %    \label{query_example}
 %\end{listing}
-%\subsection{Database structure}
+\subsection{Database structure}
 
-Documents collections:
+Documents and operations are stored in two different collections. The docs
+collection that can be described by the structure on
+Listing~\ref{docs_collection} summarizes information about documents such
+as the current version, a snapshot of this version and some metadata.
+
 %\begin{listing}
 %    \begin{minted}[frame=single,
 %            framesep=3mm,
@@ -147,6 +153,13 @@ Documents collections:
 %    \caption{Documents collection schema} 
 %    \label{docs_collection}
 %\end{listing}
+
+The ops collections that can be described by the structure on
+Listing~\ref{ops_collection} contains all the operations such as they were
+transformed by ShareJS algorithms. Each operations consists of one or several
+addition or deletion paired with their position. We also added a name field in
+the meta information to be able to identify the author of a certain
+modification.
 %
 %\begin{listing}
 %    \begin{minted}[frame=single,
