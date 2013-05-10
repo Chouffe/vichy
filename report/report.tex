@@ -65,7 +65,7 @@ of algorithms are able to decide which must be applied first and how the second
 operation must be transformed and applied in order to achieve a consistent result.
 Developing a complete Operational Transform system for this project seemed unrealistic.
 Instead we decided to use an open-source library called ShareJS. 
-ShareJS provides a way to embbed a collaborative editor in a web page.
+ShareJS provides a way to embed a collaborative editor in a web page.
 The library is made of two parts: one on the client-side in JavaScript, 
 and one on the server-side which comes as a module for the JavaScript server-side framework
 Node.js.
@@ -74,7 +74,7 @@ We had to add the possibility to undo an operation and to authenticate an user i
 history and management of users rights.
 
 ShareJS is a young project, not yet stable and well-documented.
-Bertrand corrected a small bug in the connection of ShareJS with mongoDB
+Bertrand corrected a small bug in the connection of ShareJS with MongoDB
 
 \subsection{Database}
 ShareJS can be used with many databases as back-end. 
@@ -89,13 +89,13 @@ defined as the abilities to:
         \item Keep a record of all operations performed on a document so that
             they can be easily processed to extract statistics and allow us to
             add an undo operation on top of ShareJS.
-        \item Store informations about users and rights on document to allow
+        \item Store information about users and rights on document to allow
             secure editing through authentication and fine user rights
             configuration.
 \end{itemize}
 
 MongoDB satisfies all these needs. It is able to represent documents, operations,
-and user informations as JSON structured document. They are then organized in
+and user information as JSON structured document. They are then organized in
 collections similar to the RDBMS concept of tables but that do not enforce a schema.
 This property actually happened to be very useful later on the project since it
 allowed us to add some additional fields in the existing ShareJS database without
@@ -194,7 +194,7 @@ We used an implementation of the NetBeans Protocol for Node.js called
 
 \subsection{Vim plugin}
 
-To show in Vim some additional informations about the shared document, we
+To show in Vim some additional information about the shared document, we
 created a plugin written in \textit{Vim script} and importing python functions
 which are simpler to write.\\
 We implemented a \textit{blame} function opening a new buffer next to the
@@ -205,7 +205,7 @@ current one, and showing who was the last person to modify each line.
 In the end, the collaborative editing in Vim works with our implementation.
 It has been quite difficult to choose the right method to implement our collaborative plugin
 because Vim gives few tools to access the modifications a user does. With more time,
-we could have improved the visualisation of the statistics to show them in a more friendly way.
+we could have improved the visualization of the statistics to show them in a more friendly way.
 
 \begin{thebibliography}{1}
 
