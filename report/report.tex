@@ -11,32 +11,107 @@
 \title{Vichy: the collaborative editor}
 \subtitle{Get ready to love it, resistance is futile\ldots}
 
-\author{Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet, Romain Pomier}
+\author{Romain Pomier,\\Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet}
 
 \institute{School of Computer Science and Communication, Royal Institute of Technology KTH, Stockholm}
 \maketitle
 
 \begin{abstract}
 
-The purpose of this project is to allow several persons to modify the same document at the same time, the changes being applied on every versions. The behavior is then the same as the one of a Google Doc. Instead of using collaborative editing in a browser, this article presents a solution to give the text editor Vim a plugin for collaborative editing. Different modules and technologies have been used, among them the NoSQL database MongoDB which is used to store all the data of users and the
-modifications they do. We use these data to have some statistics about the developing process. For instance, we can know who made the last change. Besides this, ShareJS, an Operational Transform library for NodeJS, is used to deal with concurrent editing and to synchronise all the different versions available.
+The purpose of this project is to allow several persons to modify the same
+document at the same time, the changes being applied on every versions.
+The behavior is then the same as the one of a Google Doc.
+Instead of using collaborative editing in a browser, this article presents a
+solution to give the text editor Vim a plugin for collaborative editing.
+Different modules and technologies have been used, among them the NoSQL
+database MongoDB which is used to store all the data of users and the
+modifications they do.
+We use these data to have some statistics about the developing process.
+For instance, we can know who made the last change. Besides this, ShareJS, an
+Operational Transform library for NodeJS, is used to deal with concurrent
+editing and to synchronise all the different versions available.
 
 \end{abstract}
 
 \section{Introduction}\label{sec:Introduction}
 
-The development of the Internet has changed the way people work. Whereas one used to share carefully the work among members of a team between two meetings, one now work at the same time on the same parts of the project thanks to real-time tools. The success of the famous Google Documents is a good example of the development of collaborative work for the general public. The idea of this project was to adapt the same concept to Vim, a well-known text editor very popular among nerds.
-This paper presents in the first part the method which has been used on the client side to extract the modifications in Vim. In the second part, we explain the database structure and how we managed to solve the problem of concurrency with ShareJS. Some statistics are extracted from the database to give every user some information about the coding process. Finally, we explain in the conclusion how the solution can be improved or at least made differently.
+The development of the Internet has changed the way people work.
+Whereas one used to share carefully the work among members of a team between
+two meetings, one now work at the same time on the same parts of the project
+thanks to real-time tools.
+The success of the famous Google Documents is a good example of the development
+of collaborative work for the general public.
+The idea of this project was to adapt the same concept to Vim, a well-known
+text editor very popular among nerds.
+This paper presents in the first part the method which has been used on the
+client side to extract the modifications in Vim.
+In the second part, we explain the database structure and how we managed to
+solve the problem of concurrency with ShareJS.
+Some statistics are extracted from the database to give every user some
+information about the coding process.
+Finally, we explain in the conclusion how the solution can be improved or at
+least made differently.
+
+\section{Collaborative editing}\label{sec:Collabo}
+
+Allowing users to collaboratively edit documents is not an easy task.
+What happens if two users modify the document at the same time ?
+Worst, they could even decide to modify the same word. A class
+of algorithms was developed to handle these difficulties:
+the Operational Transform algorithms. Given two concurrent operations, these kind
+of algorithms are able to decide which must be applied first and how the second
+operation must be transformed and applied in order to achieve a consistent result.
+Developing a complete Operational Transform system for this project seemed unreallistic.
+Instead we decided to use a library called ShareJS. 
+ShareJS provides a way to embed a collaborative editor in a web page.
+The library is made of two parts: one on the client-side in javascript, 
+and one on the server side which comes as a module for the javascript server-side framework
+nodeJS.
+Our work in this project consisted in
+\begin{itemize}
+\item interface ShareJS with vim
+\item add the possibility for a user to create, delete documents and manage the right of other users
+\item Add missing functionality to ShareJS: undo, history
+\end{itemize}
+
+However ShareJS does not provide all the operations we need.
+For example it does not provide the possibility to get information about the history of the document.
+It also does not enable to undo operations.
+
+ShareJS is a young project, not yet stable and well-documented.
+Bertrand corrected a small bug in the connection of ShareJS with mongoDB , (and its contribution was accepted in the project).
+
+ShareJS can be used with many databases as backend. 
+The available databases are: amazon, redis, couchDb, mongoDb, pg and mmysql.
+We decided to use mongoDb because we wanted to learn how this database works.
+
+\section{Implementation of the undo functionality}\label{sec:Others}
 
 \section{Extraction of Vim modifications}\label{sec:Others}
 
 \subsection{Use of the NetBeans Protocol}
 
-The NetBeans protocol of Vim is a text based communication protocol over a classical TCP socket. It permits any environment providing a socket interface to control Vim using this protocol.\cite{netbeans} Using this protocol, we can then create a client that will be a link between our server who is merging the different version of the document, and the Vim instance. The client will be notified every time the user modifies the document, and will update the buffer in Vim when it receives modifications from the server. It would have been possible to have vim directly connected to the distant server, but then the server would have had the full power over vim clients, which is not good for obvious security reasons.\\
-We used an implementation of the NetBeans Protocol for Node.js called \textit{node-vim-netbeans}.
+The NetBeans protocol of Vim is a text based communication protocol over a
+classical TCP socket.
+It permits any environment providing a socket interface to control Vim using
+this protocol.\cite{netbeans} Using this protocol, we can then create a client
+that will be a link between our server who is merging the different version of
+the document, and the Vim instance.
+The client will be notified every time the user modifies the document, and will
+update the buffer in Vim when it receives modifications from the server.
+It would have been possible to have vim directly connected to the distant
+server, but then the server would have had the full power over vim clients,
+which is not good for obvious security reasons.\\
+We used an implementation of the NetBeans Protocol for Node.js called
+\textit{node-vim-netbeans}.\cite{node-vim-netbeans}
 
+\subsection{Vim plugin}
 
-\section{Database structure and concurrency problems}\label{sec:Others}
+To show in Vim some additional informations about the shared document, we
+created a plugin written in \textit{Vim script} and importing python function
+which are simpler to write.\\
+We implemented a \textit{blame} function opening a new buffer next to the
+current one, and showing who was the last person to modify each line.
 
 \section{Conclusion}\label{sec:Conclusion}
 
