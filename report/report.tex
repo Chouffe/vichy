@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
-\usepackage{minted}
+%\usepackage{minted}
 
 %\usepackage{graphicx}
 %
@@ -138,9 +138,27 @@ This property actually happened to be very useful later on the project since it
 allowed us to add some additional fields in the existing ShareJS database without
 breaking it. Furthermore MongoDB provides powerful aggregation features through
 its aggregation framework and map-reduce implementation that we used to compute
-statistics on the database.
+statistics on the database (see listing~\ref{query_example} for an example).
 
-\subsection{Database structure}
+%\begin{listing}
+%    \begin{minted}[frame=single,
+%            framesep=3mm,
+%            xleftmargin=21pt,
+%        tabsize=4]{js}
+%        db.ops.aggregate(
+%            {$match : {
+%                "_id.doc": docName }
+%            },
+%            {$group :{
+%                _id: "$opData.meta.name",
+%                ops: {$sum : 1}}
+%            }
+%        );
+%    \end{minted}
+%    \caption{Query computing total number of users operations on a document} 
+%    \label{query_example}
+%\end{listing}
+%\subsection{Database structure}
 
 Documents collections:
 %\begin{listing}
