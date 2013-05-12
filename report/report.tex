@@ -1,0 +1,248 @@
+\documentclass{llncs}
+
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+%\usepackage{minted}
+
+%\usepackage{graphicx}
+%
+\begin{document}
+
+
+\title{Vichy: the collaborative editor}
+\subtitle{Get ready to love it, resistance is futile\ldots}
+
+\author{Arthur Caillau, Caroline Keramsi, Paul Lagrée, Bertrand Mermet,\\Romain Pomier}
+
+\institute{School of Computer Science and Communication, Royal Institute of Technology KTH, Stockholm}
+\maketitle
+
+\begin{abstract}
+
+The purpose of this project is to allow several persons to modify the same
+document at the same time, the changes being applied on every versions.
+The behavior is then the same as the one of a Google Doc.
+Instead of using collaborative editing in a browser, this article presents a
+solution to give the text editor Vim a plugin for collaborative editing.
+Different modules and technologies have been used, among them the NoSQL
+database MongoDB which is used to store all the data of users and the
+modifications they do.
+We use these data to have some statistics about the developing process.
+For instance, we can know who made the last change. Besides this, ShareJS, an
+Operational Transform library for NodeJS, is used to deal with concurrent
+editing and to synchronise all the different versions available.
+
+\end{abstract}
+
+\section{Introduction}\label{sec:Introduction}
+
+The development of the Internet has changed the way people work.
+Whereas one used to share carefully the work among members of a team between
+two meetings, one now work at the same time on the same parts of the project
+thanks to real-time tools.
+The success of the famous Google Documents is a good example of the development
+of collaborative work for the general public.
+The idea of this project was to adapt the same concept to Vim, a well-known
+text editor very popular among nerds.\\
+This report presents in the first part the server side of our project, explaining
+the database structure and how we managed to solve the problem of concurrency with ShareJS.
+We will also write about the statistics we extracted from the database to give
+every user some information about the collaboration.\\
+The second part will focus on the client side, giving details of the method
+which has been used to synchronise the document in Vim with the one on our server.\\
+Finally, we explain in the conclusion how the solution can be improved or at
+least made differently.
+
+\section{Server-side}\label{sec:Server-side}
+
+\subsection{Synchronization}
+
+Allowing users to collaboratively edit documents is not an easy task.
+What happens if two users modify the document at the same time?
+They could even modify the same word! A class of algorithms was developed to handle these difficulties:
+the Operational Transform algorithms. Given two concurrent operations, these kind
+of algorithms are able to decide which must be applied first and how the second
+operation must be transformed and applied in order to achieve a consistent result.\\
+Developing a complete Operational Transform system for this project seemed unrealistic.
+Instead we decided to use an open-source library called ShareJS.\cite{sharejs}
+ShareJS provides a way to embed a collaborative editor in a web page.\\
+The library is made of two parts: one on the client-side in JavaScript, 
+and one on the server-side which comes as a module for the JavaScript server-side framework
+Node.js.\cite{nodejs} We then wrote our server in JavaScript, using Node.js\\
+However, ShareJS does not provide directly all the features that we need. 
+We had to add the possibility to undo an operation and to authenticate an user in order to add
+history and management of users rights.\\
+\\
+ShareJS is a powerfull library, but is still a young project, and not yet stable and well-documented.
+That brought us some problems.
+Bertrand even had to correct a small bug in the source code of ShareJS concerning its connection with MongoDB.
+
+\subsection{Database}
+ShareJS can be used with many databases as back-end. 
+The available databases are: Redis, CouchDB, MongoDB, PostgreSQL and MySQL.
+We chose to use the NoSQL database MongoDB\cite{mongo} for several reasons. As a starting
+point we were curious to discover the trending world of NoSQL databases. So we
+first did some research to make sure that NoSQL was suitable for our use that we
+defined as the abilities to:
+
+\begin{itemize}
+        \item Store a current snapshot of the document as well as some metadata.
+        \item Keep a record of all operations performed on a document so that
+            they can be easily processed to extract statistics and allow us to
+            add an undo operation on top of ShareJS.
+        \item Store information about users and rights on document to allow
+            secure editing through authentication and fine user rights
+            configuration.
+\end{itemize}
+
+MongoDB satisfies all these needs. It is able to represent documents, operations,
+and user information as JSON structured document. They are then organized in
+collections similar to the RDBMS concept of tables but that do not enforce a schema.
+This property actually happened to be very useful later on the project since it
+allowed us to add some additional fields in the existing ShareJS database without
+breaking it. Furthermore MongoDB provides powerful aggregation features through
+its aggregation framework and map-reduce implementation that we used to compute
+statistics on the database (see listing~\ref{query_example} for an example).
+
+%\begin{listing}
+%    \begin{minted}[frame=single,
+%            framesep=3mm,
+%            xleftmargin=21pt,
+%        tabsize=4]{js}
+%        db.ops.aggregate(
+%            {$match : {
+%                "_id.doc": docName }
+%            },
+%            {$group :{
+%                _id: "$opData.meta.name",
+%                ops: {$sum : 1}}
+%            }
+%        );
+%    \end{minted}
+%    \caption{Query computing total number of users operations on a document} 
+%    \label{query_example}
+%\end{listing}
+\subsection{Database structure}
+
+Documents and operations are stored in two different collections. The docs
+collection that can be described by the structure on
+Listing~\ref{docs_collection} summarizes information about documents such
+as the current version, a snapshot of this version and some metadata.
+
+%\begin{listing}
+%    \begin{minted}[frame=single,
+%            framesep=3mm,
+%            xleftmargin=21pt,
+%        tabsize=4]{js}
+%        {
+%            "_id": string,
+%            "data": {
+%                "v": number,
+%                "meta": {
+%                    "creator": string,
+%                    "mtime": number,
+%                    "ctime": number,
+%                    "name": string
+%                },
+%                "snapshot": string,
+%                "type": string
+%            }
+%        }
+%    \end{minted}
+%    \caption{Documents collection schema} 
+%    \label{docs_collection}
+%\end{listing}
+
+The ops collections that can be described by the structure on
+Listing~\ref{ops_collection} contains all the operations such as they were
+transformed by ShareJS algorithms. Each operations consists of one or several
+addition or deletion paired with their position. We also added a name field in
+the meta information to be able to identify the author of a certain
+modification.
+%
+%\begin{listing}
+%    \begin{minted}[frame=single,
+%            framesep=3mm,
+%            xleftmargin=21pt,
+%        tabsize=4]{js}
+%        {
+%            "opData": {
+%                "op": [objects],
+%                "meta": {
+%                    "source": string,
+%                    "name": string,
+%                    "ts": number
+%                }
+%            },
+%            "_id": {
+%                "doc": string,
+%                "v": number
+%            }
+%        }
+%    \end{minted}
+%    \caption{Operations collection schema} 
+%    \label{ops_collection}
+%\end{listing}
+
+\subsection{Management of the documents}
+
+We created a website to allow the users to manage their documents.
+To build quickly the building system, we used the template Node-login which is built
+on Node.js and MongoDB.
+Once the user is logged, he can create documents and then share them with the other
+users existing on the website. The user can also open his documents inside the browser.
+
+\section{Client side}\label{sec:Others}
+
+The client is written in javascript, powered using Node.js.\cite{nodejs}
+
+\subsection{Use of the NetBeans Protocol}
+
+The NetBeans protocol of Vim is a text based communication protocol over a
+classical TCP socket.
+It permits any environment providing a socket interface to control Vim using
+this protocol.\cite{netbeans} Using this protocol, we can then create a client
+that will be a link between our server who is merging the different version of
+the document, and the Vim instance.
+The client will be notified every time the user modifies the document, and will
+update the buffer in Vim when it receives modifications from the server.
+It would have been possible to have vim directly connected to the distant
+server, but then the server would have had the full power over vim clients,
+which is not good for obvious security reasons.\\
+We used an implementation of the NetBeans Protocol for Node.js called
+\textit{node-vim-netbeans}.\cite{node-vim-netbeans}
+
+\subsection{Vim plugin}
+
+To show in Vim some additional information about the shared document, we
+created a plugin written in \textit{Vim script} and importing python functions
+which are simpler to write.\\
+We implemented a \textit{blame} function opening a new buffer next to the
+current one, and showing who was the last person to modify each line.
+
+\section{Conclusion}\label{sec:Conclusion}
+
+In the end, the collaborative editing in Vim works with our implementation.
+It has been quite difficult to choose the right method to implement our collaborative plugin
+because Vim gives few tools to access the modifications a user does, but we managed to make it work.
+With more time, we could have improved the visualization of the statistics to show them in a more friendly way.
+The source code of our project is available on Github.\cite{github}
+
+\begin{thebibliography}{1}
+
+\bibitem{sharejs}
+ShareJS website: \url{http://sharejs.org}
+\bibitem{nodejs}
+Node.js website: \url{http://nodejs.org}
+\bibitem{mongo}
+MongoDB website: \url{http://www.mongodb.org}
+\bibitem{netbeans}
+Vim documentation defining this protocol: \url{http://vimdoc.sourceforge.net/htmldoc/netbeans.html}
+\bibitem{node-vim-netbeans}
+node-vim-netbeans on github: \url{https://github.com/clehner/node-vim-netbeans}
+\bibitem{github}
+\url{https://github.com/Chouffe/vichy}
+
+\end{thebibliography}
+
+\end{document}
