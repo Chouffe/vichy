@@ -296,25 +296,34 @@ module.exports = function(app) {
   });
 
 
-  app.get('/chart/:document', function(req, res) {
+  app.get('/pie_chart/:document', function(req, res) {
     docName = req.params.document;
     stats.userStats(docName,function (err, result) 
       {
         users_list = ""
-        series = []
+        operations = "["
+        
         for (i = 0; i<result.length; i++)
         {
           users_list += "\'" + result[i]._id + "\'";
-          if (i!= result.length-1)
-            users_list+=",";
-          series.push({name: result[i]._id, data: [result[i].ops]});
-        }
+          operations += "[\'" + result[i]._id + "\'";
+          operations+=","+result[i].ops+"]";
 
-        res.render('chart', {users: users_list ,
-          series: JSON.stringify(series).replace(/\"/g, "\'"),
+          if (i!= result.length-1)
+          {
+            users_list+=",";
+            operations+=",";
+          }
+        }
+        operations += "]"
+
+        res.render('pie_chart', {users: users_list ,
+          operations: operations, 
           doc_name: docName});
       });
   });
+  
+  //operations: JSON.stringify(series).replace(/\"/g, "\'"),
 
   app.get('/login/:user/:password.json', function(req, res){
       console.log("LOGIN");
