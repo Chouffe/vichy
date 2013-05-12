@@ -17,6 +17,8 @@ It is required to run first the script called client_ide.js with
 
 Then, a buffer is synchronized with the IDE with
 > :nbs
+
+Make sure to sync the working buffer by typing in vim
 > <C-o>
 
 In normal Mode, one can hit the keystroke '-' to display a blame of the current buffer.
