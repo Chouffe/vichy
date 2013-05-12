@@ -1,0 +1,18 @@
+
+.modal-opendoc.modal.hide.fade
+    div.modal-header
+        button.close(data-dismiss='modal') x
+        h3
+    div.modal-body
+        p
+        fieldset
+            #doclist-cg.control-group
+                label.control-label(for='document-to-open') My documents
+                .controls
+                    select#document-to-open(name='docs')
+                        option(selected=true) Choose one of your document
+                        each item in documents
+                            option(selected=false)= item.doc
+    div.modal-footer
+        button(data-dismiss="modal").cancel.btn Cancel
+        button.submit.btn Open

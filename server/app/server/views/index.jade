@@ -1,0 +1,31 @@
+!!! 5
+html
+  head
+    link(href='/static/style.css', rel='stylesheet', type='text/css')
+    title Hello World
+  body
+    #header
+      #htext
+        | Editing **hello**
+        button(onclick='undo(documentToOpen)') Undo
+        button(onclick='blame(editor, documentToOpen)') Blame
+    #editor
+    script(src='/static/lib/ace/ace.js', type='text/javascript', charset='utf-8')
+    script(src='/channel/bcsocket.js')
+    script(src='/static/webclient/share.uncompressed.js')
+    script(src='/static/webclient/ace.js')
+    script(src='/static/work/undo.js')
+    script(src='/static/work/blame.js')
+    script(type='text/javascript')
+      var editor = ace.edit("editor");
+      var documentToOpen = "#{open_doc}";
+      editor.setFontSize(12);
+      sharejs.open(documentToOpen, 'text', function(error, doc) {
+        if (error) {
+          alert("Error");
+        }
+        else {
+          doc.attach_ace(editor);
+        }
+      });
+

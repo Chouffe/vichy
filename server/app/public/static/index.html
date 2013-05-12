@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<link href="style.css" rel="stylesheet" type="text/css">
+		<title>Hello World</title>
+	</head>
+
+	<body>
+		<div id="header">
+			<div id="htext">
+				Editing <b>hello</b></input>
+        <button onclick="undo()">Undo</button>
+        <button onclick="blame(editor)">Blame</button>
+			</div>
+		</div>
+
+		<div id="editor"></div>
+
+		<script src="lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    	<script src="/channel/bcsocket.js"></script>
+		<script src="webclient/share.uncompressed.js"></script>
+		<script src="webclient/ace.js"></script>
+    	<script src="work/undo.js"></script> <!-- provide undo function -->
+    	<script src="work/blame.js"></script>
+		<script>
+var editor = ace.edit("editor");
+editor.setFontSize(12);
+
+sharejs.open('test2', 'text', function(error, doc) {
+  if (error) {
+    alert("Error")
+  } 
+  else {
+    doc.attach_ace(editor);
+  }
+});
+		</script>
+	</body>
+</html>	
+
