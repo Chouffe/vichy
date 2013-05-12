@@ -243,8 +243,9 @@ module.exports = function(app) {
 // Add a user to an existing document
 
     app.post('/mydocuments', function(req, res){
+    	var documentToAdd = display.reverseDoc(req.param('doc'));
 		AM.addUser({
-			doc 	: req.param('doc'),
+			doc 	: documentToAdd,
 			newUser : req.param('user'),
 			user    : req.cookies.user			
 			
@@ -274,7 +275,8 @@ module.exports = function(app) {
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{
 			console.log(req.params.document);
-			res.render('index', { open_doc: req.params.document});//, { document_open: req.params.document});
+			var documentToOpen = display.reverseDoc(req.params.document);
+			res.render('index', { open_doc: documentToOpen});//, { document_open: req.params.document});
 		}
 	});
 
