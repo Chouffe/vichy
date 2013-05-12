@@ -100,7 +100,7 @@ exports.addNewDoc = function(newData, callback)
 			callback(e,'userNodFound');
 		}
 		else {
-			documents.findOne({'doc': newData.doc, 'users':newData.user}, function(e, o) {
+			documents.findOne({'doc': newData.doc}, function(e, o) {
 				if(o != null) {
 					callback(e,'docExists');
 				}

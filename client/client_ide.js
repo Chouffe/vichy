@@ -355,18 +355,23 @@ function remove(offset, length, from) {
 function getBlameForBuffer(buf) {
 
     // For the tests
-    var numb_lines = 50;
+    var path = "/blame/" + doc_name + ".json";
+    console.log("Call the function getBlameForBuffer()");
 
     $.ajax({
         // url: "http://"+domain+"/blame/"+doc_id+"/"+token+".json",
         // Tests
-        url: "http://"+domain+"/blame/"+doc_id+"/"+numb_lines+"/"+token+".json",
+        url: "http://"+domain+path,
+        // url: "http://"+domain+"/blame/"+doc_id+"/"+numb_lines+"/"+token+".json",
         success: function(data) {
+            console.log("Success");
             if (typeof(data["error"]) != "undefined"){
                 console.log("Login error: " + data["error"]);
             }
             else {
+                console.log("Test: " + data);
                 if (data["blame"]) {
+                    console.log("Blame: " + data["blame"]);
                     fillBufferWithBlame(buf, data["blame"]);
                 }
             }
@@ -430,9 +435,6 @@ function launchServer(){
             buf.startDocumentListen();
         });
 
-        // Blame
-        vim.key("C-i", getBlameForBuffer);
-        
         vim.on("killed", function (buf) {
             var doc = buf && buf._doc;
             if (doc) doc.disconnectBuffer(buf);
@@ -444,6 +446,7 @@ function launchServer(){
             sleep(50);
             buffer.getText(function (text) {
                 if (text.replace(/(\r\n|\n|\r)/gm,"") == 'vichyBlame') {
+                    console.log("Blamed called");
                     getBlameForBuffer(buffer);
                 }
             });

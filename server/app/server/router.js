@@ -6,6 +6,7 @@ var EM = require('./modules/email-dispatcher');
 var undo = require('../../lib/undo')
 var blame = require('../../lib/blame')
 var stats = require('../../lib/stats')
+var display = require('../../lib/display')
 
 module.exports = function(app) {
 
@@ -59,7 +60,7 @@ module.exports = function(app) {
 	                if(premier==0) {
 	                    autre = autre + ', ';
 	                }
-	                autre = autre + "{ doc: '"+DL[i]+"' }";
+	                autre = autre + "{ doc: '"+display.display(DL[i])+"' }";
 	                premier = 0;
 	            }
 	            autre = autre + ']';
@@ -212,8 +213,9 @@ module.exports = function(app) {
 // Add a new document
 
 	app.post('/newdoc', function(req, res){
+        var document = req.param('doc')+'$$$$'+req.cookies.user;
 		AM.addNewDoc({
-			doc 	: req.param('doc'),
+			doc 	: document,
 			user 	: req.cookies.user
 			
 			}, function(e, obj){
@@ -241,8 +243,9 @@ module.exports = function(app) {
 // Add a user to an existing document
 
     app.post('/mydocuments', function(req, res){
+    	var documentToAdd = display.reverseDoc(req.param('doc'));
 		AM.addUser({
-			doc 	: req.param('doc'),
+			doc 	: documentToAdd,
 			newUser : req.param('user'),
 			user    : req.cookies.user			
 			
@@ -272,7 +275,8 @@ module.exports = function(app) {
 			res.render('login', { title: 'Hello - Please Login To Your Account' });
 		}	else{
 			console.log(req.params.document);
-			res.render('index', { open_doc: req.params.document});//, { document_open: req.params.document});
+			var documentToOpen = display.reverseDoc(req.params.document);
+			res.render('index', { open_doc: documentToOpen});//, { document_open: req.params.document});
 		}
 	});
 
@@ -295,22 +299,35 @@ module.exports = function(app) {
       }
   });
 
-  app.get('/chart', function(req, res) {
-    docName = "Ne";
-    //uStat = stats.userStats(docName);
-    //uStat
-    l = ["Moi", "Toi", "Lui"]
-    users_list = ""
-    for (i = 0; i<l.length; i++)
-    {
-      users_list += "\'" + l[0] + "\'";
-      if (i!= l.length-1)
-        users_list+=",";
-    }
 
+  app.get('/pie_chart/:document', function(req, res) {
+    docName = req.params.document;
+    stats.userStats(docName,function (err, result) 
+      {
+        users_list = ""
+        operations = "["
+        
+        for (i = 0; i<result.length; i++)
+        {
+          users_list += "\'" + result[i]._id + "\'";
+          operations += "[\'" + result[i]._id + "\'";
+          operations+=","+result[i].ops+"]";
 
-    res.render('chart', {users: users_list , doc_name: docName});
+          if (i!= result.length-1)
+          {
+            users_list+=",";
+            operations+=",";
+          }
+        }
+        operations += "]"
+
+        res.render('pie_chart', {users: users_list ,
+          operations: operations, 
+          doc_name: docName});
+      });
   });
+  
+  //operations: JSON.stringify(series).replace(/\"/g, "\'"),
 
   app.get('/login/:user/:password.json', function(req, res){
       console.log("LOGIN");
