@@ -44,6 +44,7 @@ function login(username, password) {
                     agent: false
                     }, function(res) {
                     cookies = cookie.parse(res.headers['set-cookie'][0]);
+                    console.log(res.headers['set-cookie'][0]);
                     });
                 launchServer();
             }
@@ -73,25 +74,35 @@ function openDocument(buf) {
                 pushTextToBuffer(buf, shared_doc.getText());
 
                 shared_doc.on('insert', function(pos, text){
-                    console.log("Update: insert at "+pos+" "+text.length+" "+text);
+                    var b = Buffer(text);
+                    console.log("Update: insert at "+pos+" "+b.length+" "+text)
                     var restoreCursor = preserveCursor(buffer);
-                    console.log("First part: "+current_content.slice(0, pos));
-                    console.log("Second part: "+Buffer(text));
-                    console.log("Third part: "+current_content.slice(pos));
+                    if (current_content.length > pos+text.length+1) {
+                        console.log("After: "+current_content.slice(pos+text.length, pos+text.length+1));
+                    }
+                    var removeAfter = false;
+                    if (text != "\n" && (current_content.length <= pos+text.length+1 || current_content.slice(pos+text.length, pos+text.length+1) == "\n") && (pos == 0 || current_content.slice(pos-1, pos) == "\n")) {
+                        removeAfter = true;
+                        console.log("Remove line after !");
+                    }
                     current_content = Buffer.concat([
                         current_content.slice(0, pos),
                         Buffer(text),
                         current_content.slice(pos)
                     ]);//, current_content.length + text.length);
 
-                    pushTextToBuffer(buffer, shared_doc.getText());
-                    restoreCursor();
-                    /*
-                    buffer.insert(pos, text, function(){
-                        restoreCursor();
-                        buffer.insertDone();
+                    //pushTextToBuffer(buffer, shared_doc.getText());
+                    buffer.insert(pos, Buffer(text), function(){
+                        buffer.getLength(function(len){
+                            if (removeAfter && len > pos+text.length+1){
+                                buffer.remove(pos+text.length, 1, function(){
+                                    console.log("Removed");
+                                    restoreCursor();
+                                    buffer.insertDone();
+                                });
+                            }
+                        });
                     });
-                    */
                 });
 
                 shared_doc.on('delete', function(pos, text){
@@ -101,15 +112,13 @@ function openDocument(buf) {
                         current_content.slice(0, pos),
                         current_content.slice(pos + text.length)
                     ], current_content.length - text.length);
-                    /*
                     buffer.remove(pos, text.length, function(){
                         restoreCursor();
                         buffer.insertDone();
                     });
-                    */
 
-                    pushTextToBuffer(buffer, shared_doc.getText());
-                    restoreCursor();
+                    //pushTextToBuffer(buffer, shared_doc.getText());
+                    //restoreCursor();
                 });
             }
         );
@@ -273,6 +282,7 @@ function bufferWantsToRemove(buf, offset, length) {
         remove(offset, length, buf);
     }
     var timeout = setTimeout(defaultRemove, 200);
+    //remove(offset, length, buf);
 };
 
 function bufferWantsToInsert(buf, offset, text) {
@@ -295,6 +305,7 @@ function bufferWantsToInsert(buf, offset, text) {
     } else {
         insert(offset, text, buf);
     }
+    //insert(offset, text, buf);
 };
 
 function insert(offset, text, from) {
