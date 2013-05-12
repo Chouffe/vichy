@@ -297,22 +297,35 @@ module.exports = function(app) {
       }
   });
 
-  app.get('/chart', function(req, res) {
-    docName = "Ne";
-    //uStat = stats.userStats(docName);
-    //uStat
-    l = ["Moi", "Toi", "Lui"]
-    users_list = ""
-    for (i = 0; i<l.length; i++)
-    {
-      users_list += "\'" + l[0] + "\'";
-      if (i!= l.length-1)
-        users_list+=",";
-    }
 
+  app.get('/pie_chart/:document', function(req, res) {
+    docName = req.params.document;
+    stats.userStats(docName,function (err, result) 
+      {
+        users_list = ""
+        operations = "["
+        
+        for (i = 0; i<result.length; i++)
+        {
+          users_list += "\'" + result[i]._id + "\'";
+          operations += "[\'" + result[i]._id + "\'";
+          operations+=","+result[i].ops+"]";
 
-    res.render('chart', {users: users_list , doc_name: docName});
+          if (i!= result.length-1)
+          {
+            users_list+=",";
+            operations+=",";
+          }
+        }
+        operations += "]"
+
+        res.render('pie_chart', {users: users_list ,
+          operations: operations, 
+          doc_name: docName});
+      });
   });
+  
+  //operations: JSON.stringify(series).replace(/\"/g, "\'"),
 
   app.get('/login/:user/:password.json', function(req, res){
       console.log("LOGIN");
