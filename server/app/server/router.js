@@ -294,6 +294,10 @@ module.exports = function(app) {
       }
   });
 
+  app.get('/chart', function(req, res) {
+    res.render('chart', {doc_name: "MyDoc"});
+  });
+
   app.get('/login/:user/:password.json', function(req, res){
       console.log("LOGIN");
       AM.manualLogin(req.params.user, req.params.password, function(e, o){
