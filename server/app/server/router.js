@@ -5,6 +5,7 @@ var EM = require('./modules/email-dispatcher');
 
 var undo = require('../../lib/undo')
 var blame = require('../../lib/blame')
+var stats = require('../../lib/stats')
 
 module.exports = function(app) {
 
@@ -295,7 +296,20 @@ module.exports = function(app) {
   });
 
   app.get('/chart', function(req, res) {
-    res.render('chart', {doc_name: "MyDoc"});
+    docName = "Ne";
+    //uStat = stats.userStats(docName);
+    //uStat
+    l = ["Moi", "Toi", "Lui"]
+    users_list = ""
+    for (i = 0; i<l.length; i++)
+    {
+      users_list += "\'" + l[0] + "\'";
+      if (i!= l.length-1)
+        users_list+=",";
+    }
+
+
+    res.render('chart', {users: users_list , doc_name: docName});
   });
 
   app.get('/login/:user/:password.json', function(req, res){
