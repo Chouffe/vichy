@@ -6,6 +6,7 @@ var EM = require('./modules/email-dispatcher');
 var undo = require('../../lib/undo')
 var blame = require('../../lib/blame')
 var stats = require('../../lib/stats')
+var display = require('../../lib/display')
 
 module.exports = function(app) {
 
@@ -59,7 +60,7 @@ module.exports = function(app) {
 	                if(premier==0) {
 	                    autre = autre + ', ';
 	                }
-	                autre = autre + "{ doc: '"+DL[i]+"' }";
+	                autre = autre + "{ doc: '"+display.display(DL[i])+"' }";
 	                premier = 0;
 	            }
 	            autre = autre + ']';
@@ -212,8 +213,9 @@ module.exports = function(app) {
 // Add a new document
 
 	app.post('/newdoc', function(req, res){
+        var document = req.param('doc')+'$$$$'+req.cookies.user;
 		AM.addNewDoc({
-			doc 	: req.param('doc'),
+			doc 	: document,
 			user 	: req.cookies.user
 			
 			}, function(e, obj){
