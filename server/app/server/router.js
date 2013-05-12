@@ -295,21 +295,25 @@ module.exports = function(app) {
       }
   });
 
-  app.get('/chart', function(req, res) {
-    docName = "Ne";
-    //uStat = stats.userStats(docName);
-    //uStat
-    l = ["Moi", "Toi", "Lui"]
-    users_list = ""
-    for (i = 0; i<l.length; i++)
-    {
-      users_list += "\'" + l[0] + "\'";
-      if (i!= l.length-1)
-        users_list+=",";
-    }
 
+  app.get('/chart/:document', function(req, res) {
+    docName = req.params.document;
+    stats.userStats(docName,function (err, result) 
+      {
+        users_list = ""
+        series = []
+        for (i = 0; i<result.length; i++)
+        {
+          users_list += "\'" + result[i]._id + "\'";
+          if (i!= result.length-1)
+            users_list+=",";
+          series.push({name: result[i]._id, data: [result[i].ops]});
+        }
 
-    res.render('chart', {users: users_list , doc_name: docName});
+        res.render('chart', {users: users_list ,
+          series: JSON.stringify(series).replace(/\"/g, "\'"),
+          doc_name: docName});
+      });
   });
 
   app.get('/login/:user/:password.json', function(req, res){

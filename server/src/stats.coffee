@@ -22,12 +22,12 @@ client.open (err, db) ->
         console.log('connected')
         if options.user and options.password
             client.authenticate(options.user, options.password)
-        userStats 'test2', (err, stats) ->
-            console.log err, stats
-        docStats (err, stats) ->
-            console.log err, stats
-        docdetStats (err, stats) ->
-            console.log err, stats
+        #userStats 'test2', (err, stats) ->
+            #console.log err, stats
+        #docStats (err, stats) ->
+            #console.log err, stats
+        #docdetStats (err, stats) ->
+            #console.log err, stats
 
 userStats = (docName, callback) ->
     client.collection 'ops', (err, collection) ->
