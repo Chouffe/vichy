@@ -72,6 +72,7 @@ function openDocument(buf) {
                     //shared_doc.insert(0, "\n");
                 }
                 pushTextToBuffer(buf, shared_doc.getText());
+                setInterval(function() {pushTextToBuffer(buf, shared_doc.getText())}, 1000);
 
                 shared_doc.on('insert', function(pos, text){
                     var b = Buffer(text);
@@ -126,11 +127,9 @@ function openDocument(buf) {
 };
 
 function pushTextToBuffer(buf, text) {
-    if (text == current_content.toString().slice(0)){
-        console.log("Buffer already up to date, not pushing");
-    }
-    else{
-        current_content = Buffer(text+"\n");
+    text = text+"\n";
+    if (text != current_content.toString().slice(0)){
+        current_content = Buffer(text);
 
         var restoreCursor = preserveCursor(buf);
 
