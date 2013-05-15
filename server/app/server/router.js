@@ -322,32 +322,50 @@ module.exports = function(app) {
         operations += "]"
 
 
-        stats.timeStats(docName, function (err, result)
+        stats.timeStats(docName, function (err, results)
           {
             series = "[ \n"
-            console.log(result)
+            console.log("RESUL");
+            console.log(results);
+            result = results[0];
+            beginning = results[1];
+            now = results[2];
+            NB_SLOTS = results[3];
+            h = (now - beginning)/NB_SLOTS;
+            
+            categories = "";
+            for (var s = 0; s<NB_SLOTS; s++)
+            {
+              categories += "\'" ;
+              categories += (new Date(beginning+ s*h)).toString();
+              categories += "\'" ;
+              if (s != NB_SLOTS-1)
+                categories +=","
+            }
+
             for (var i = 0; i<result.length; i++)
             {
               series += "{ name: \'" + result[i]._id + "\'\n,";
-              series += "data: ["
-              console.log(result[i])
-              slots = result[i].value[result[i]._id]
+              series += "data: [";
+              console.log(result[i]);
+              slots = result[i].value[result[i]._id];
               for (var s = 0; s < slots.length; s++)
               {
-                series += slots[s]
+                series += slots[s];
                 if (s != slots.length -1)
-                  series += ","
+                  series += ",";
               }
-              series += "]}\n"
+              series += "]}\n";
               if (i != result.length-1)
               {
-                series += ","
+                series += ",";
               }
             }
-            series += "]"
+            series += "]";
             res.render('pie_chart', {users: users_list ,
               operations: operations, 
-              doc_name: docName, series: series});
+              doc_name: docName, series: series,
+              categories: categories});
           });
       });
   });

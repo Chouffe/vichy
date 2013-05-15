@@ -98,9 +98,7 @@ timeStats = (docName, callback) ->
     client.collection 'ops', (err, collection) ->
         return callback? err if err
         #Get first version date
-        #cursor = collection.find({_id: {doc: docName}, v:1})
         cursor = collection.find({_id: {doc: docName, v:0}})
-        #cursor = collection.find({})
         beginning = 0
         cursor.toArray (err, array) ->
             console.log("to array")
@@ -176,21 +174,13 @@ timeStats = (docName, callback) ->
                         reducedVal[name][2] += slots[2]
                 return reducedVal
 
-            #print "Map reduced Go"
-            #a = ["Caroline", "Yoann"]
-            values = [
-              {a: [1,3,4,5,4,3,3], b: [1,3,4,5,4,3,3]},
-              {b: [1,3,4,5,4,3,3]} ]
-            print "red"
-            #print reduce("c", values)
-            print "OK"
-
             collection.mapReduce( map, reduce,
               { out: docName+"_"+ NB_SLOTS+ "_time_stats" , scope: { docName: docName, beginning: beginning, now: now, NB_SLOTS: NB_SLOTS } }
               , (err, col) ->
                 return callback? err if err
                 col.find().toArray (err, result) ->
                   return callback? err if err
+                  result = [result, beginning, now, NB_SLOTS]
                   callback? err, result
             )
 
