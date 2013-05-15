@@ -175,7 +175,7 @@ timeStats = (docName, callback) ->
                 return reducedVal
 
             collection.mapReduce( map, reduce,
-              { out: docName+"_"+ NB_SLOTS+ "_time_stats" , scope: { docName: docName, beginning: beginning, now: now, NB_SLOTS: NB_SLOTS } }
+              { out: docName+"_"+ NB_SLOTS+ "_time_stats", scope: { docName: docName, beginning: beginning, now: now, NB_SLOTS: NB_SLOTS } }
               , (err, col) ->
                 return callback? err if err
                 col.find().toArray (err, result) ->

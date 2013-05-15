@@ -304,6 +304,11 @@ module.exports = function(app) {
     docName = req.params.document;
     stats.userStats(docName,function (err, result) 
       {
+        if (err)
+        {
+          res.render('404', { title: 'Page Not Found'});
+           return;
+        }
         users_list = ""
         operations = "["
         
@@ -324,6 +329,11 @@ module.exports = function(app) {
 
         stats.timeStats(docName, function (err, results)
           {
+            if (err)
+            {
+              res.render('404', { title: 'Page Not Found'}); 
+              return;
+            }
             series = "[ \n"
             console.log("RESUL");
             console.log(results);
