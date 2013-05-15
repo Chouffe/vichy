@@ -299,6 +299,11 @@ module.exports = function(app) {
       }
   });
 
+  function sort_by_name(a, b)
+  {
+    return a._id < b._id;
+  }
+
 
   app.get('/docStats/:document', function(req, res) {
     docName = req.params.document;
@@ -311,6 +316,7 @@ module.exports = function(app) {
         }
         users_list = ""
         operations = "["
+        result.sort(sort_by_name);
         
         for (i = 0; i<result.length; i++)
         {
@@ -338,6 +344,7 @@ module.exports = function(app) {
             console.log("RESUL");
             console.log(results);
             result = results[0];
+            result.sort(sort_by_name);
             beginning = results[1];
             now = results[2];
             NB_SLOTS = results[3];
