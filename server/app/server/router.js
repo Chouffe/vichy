@@ -321,9 +321,34 @@ module.exports = function(app) {
         }
         operations += "]"
 
-        res.render('pie_chart', {users: users_list ,
-          operations: operations, 
-          doc_name: docName});
+
+        stats.timeStats(docName, function (err, result)
+          {
+            series = "[ \n"
+            console.log(result)
+            for (var i = 0; i<result.length; i++)
+            {
+              series += "{ name: \'" + result[i]._id + "\'\n,";
+              series += "data: ["
+              console.log(result[i])
+              slots = result[i].value[result[i]._id]
+              for (var s = 0; s < slots.length; s++)
+              {
+                series += slots[s]
+                if (s != slots.length -1)
+                  series += ","
+              }
+              series += "]}\n"
+              if (i != result.length-1)
+              {
+                series += ","
+              }
+            }
+            series += "]"
+            res.render('pie_chart', {users: users_list ,
+              operations: operations, 
+              doc_name: docName, series: series});
+          });
       });
   });
   

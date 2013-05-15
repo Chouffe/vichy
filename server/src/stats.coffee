@@ -22,16 +22,16 @@ client.open (err, db) ->
         console.log('connected')
         if options.user and options.password
             client.authenticate(options.user, options.password)
-        timeStats 'Truc', (err, stats) ->
-          if err
-            console.log err
-            return err
-          console.log "Done"
-          console.log stats
-          for s in stats
-              console.log s
-              for v in s.value
-                  console.log v
+        #timeStats 'Truc', (err, stats) ->
+          #if err
+            #console.log err
+            #return err
+          #console.log "Done"
+          #console.log stats
+          #for s in stats
+              #console.log s
+              #for v in s.value
+                  #console.log v
 
         #userStats 'test2', (err, stats) ->
             #console.log err, stats
@@ -195,3 +195,4 @@ timeStats = (docName, callback) ->
             )
 
 exports.userStats = userStats
+exports.timeStats = timeStats
