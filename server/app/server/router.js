@@ -300,7 +300,7 @@ module.exports = function(app) {
   });
 
 
-  app.get('/pie_chart/:document', function(req, res) {
+  app.get('/docStats/:document', function(req, res) {
     docName = req.params.document;
     stats.userStats(docName,function (err, result) 
       {

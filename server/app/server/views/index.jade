@@ -9,6 +9,7 @@ html
         | Editing **#{open_doc}**
         button(onclick='undo(documentToOpen)') Undo
         button(onclick='blame(editor, documentToOpen)') Blame
+        button(onclick='window.open(\'/docStats/\'+documentToOpen)') Stats
     #editor
     script(src='/static/lib/ace/ace.js', type='text/javascript', charset='utf-8')
     script(src='/channel/bcsocket.js')
