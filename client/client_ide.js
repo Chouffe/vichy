@@ -356,11 +356,14 @@ function getBlameForBuffer(buf) {
     // For the tests
     var path = "/blame/" + doc_name + ".json";
     console.log("Call the function getBlameForBuffer()");
+    q = "http://"+domain+path;
+    q = q.replace(/ /g, "%20");
+    console.log(q);
 
     $.ajax({
         // url: "http://"+domain+"/blame/"+doc_id+"/"+token+".json",
         // Tests
-        url: "http://"+domain+path,
+        url: q,
         // url: "http://"+domain+"/blame/"+doc_id+"/"+numb_lines+"/"+token+".json",
         success: function(data) {
             console.log("Success");
