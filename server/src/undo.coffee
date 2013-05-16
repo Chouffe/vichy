@@ -38,7 +38,8 @@ filterUndone = (ops, callback) ->
     for op in do_ops
       if op
         if op.meta and op.v and op.op
-          results.push(op) if op.op[0].p
+          if op.op.length != 0
+            results.push(op) if op.op[0].p
 
     return results
 
