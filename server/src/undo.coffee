@@ -36,7 +36,9 @@ filterUndone = (ops, callback) ->
     #Remove undefined (= previously deleted) operations
     results = []
     for op in do_ops
-      results.push(op) if op
+      if op
+        if op.meta and op.v and op.op
+          results.push(op) if op.op[0].p
 
     return results
 
